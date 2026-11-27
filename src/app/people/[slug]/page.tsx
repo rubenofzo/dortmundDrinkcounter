@@ -34,7 +34,7 @@ export default async function PersonPage({ params }: Props) {
       <Link href="/people" className="-mb-2 inline-flex min-h-11 items-center text-[13px] font-semibold text-accent md:min-h-0 md:text-sm">
         ← All people
       </Link>
-      <PersonHero player={player} s={stats} />
+      <PersonHero player={player} s={stats} room={hub.rooms.find((r) => r.id === player.roomId)} />
       <StatTiles s={stats} />
       <PlayerAchievements playerId={player.id} />
       <HallPanel className="flex flex-col gap-3">

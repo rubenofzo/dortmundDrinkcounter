@@ -1,11 +1,21 @@
 import { boolean, index, integer, numeric, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
+/** Rooms (up to 4 people each), made and filled by anyone on the People page. */
+export const rooms = pgTable("rooms", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  icon: text("icon").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const players = pgTable("players", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   slug: text("slug").notNull().unique(),
   /** Index into the player palette (`src/lib/colors.ts`), fixed at creation so colours never shift. */
   colorIndex: integer("color_index").notNull().default(0),
+  /** The room this person sleeps in, if any. */
+  roomId: integer("room_id").references(() => rooms.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -13,6 +13,7 @@ const players: Player[] = ["Anna", "Ben", "Cem", "Dora", "Eli"].map((name, i) =>
   slug: name.toLowerCase(),
   colorIndex: i,
   color: "#fff",
+  roomId: null,
 }));
 
 let nextId = 1;
