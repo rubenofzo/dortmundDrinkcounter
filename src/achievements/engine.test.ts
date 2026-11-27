@@ -91,13 +91,6 @@ describe("achievement engine", () => {
     expect(get("century", 3)).toBeUndefined();
   });
 
-  it("Sticky Fingers (hidden) uses the number of undone drinks", () => {
-    const gone = [1, 2, 3].map((i) => ({ ...drink(1, fri(20, i)), deletedAt: fri(20, 10 + i) }));
-    const { get } = run([drink(1, fri(20))], fri(22), gone);
-    expect(get("sticky-fingers", 1)?.at).toBe(fri(20, 13));
-    expect(run([drink(1, fri(20))], fri(22), gone.slice(0, 2)).get("sticky-fingers", 1)).toBeUndefined();
-  });
-
   it("Last One Standing waits until the night is settled", () => {
     const drinks = [drink(1, fri(23)), drink(2, fri(24 + 3))]; // 03:00 Saturday
     const early = run(drinks, fri(24 + 4));
@@ -196,5 +189,23 @@ describe("Glühwein achievements", () => {
     const drinks = [gw(4, fri(20)), gw(4, fri(20, 0, 28)), gw(4, fri(1, 0, 30))];
     // The last one is Mon 01:00, which still belongs to Sunday's day.
     expect(run(drinks, fri(2, 0, 30)).get("gluhwein-weekend", 4)?.at).toBe(fri(1, 0, 30));
+  });
+});
+
+describe("hidden achievements", () => {
+  it("Déjà Vu: 5 of the same in a row", () => {
+    const five = Array.from({ length: 5 }, (_, i) => drink(1, fri(18 + i)));
+    expect(run(five, fri(23, 30)).get("deja-vu", 1)?.at).toBe(fri(22));
+    const broken = [...five.slice(0, 4), drink(1, fri(22), { name: "Shot", category: "Shots", drinkTypeId: 9 }), drink(1, fri(23))];
+    expect(run(broken, fri(23, 30)).get("deja-vu", 1)).toBeUndefined();
+  });
+
+  it("Brak: 10 drinks in 3 blocks, then 3 empty blocks, unlocked when the 3rd empty block ends", () => {
+    // Blocks 12–15, 15–18, 18–21 with 10 drinks, then nothing in 21–24, 00–03, 03–06.
+    const busy = Array.from({ length: 10 }, (_, i) => drink(1, fri(12) + i * 50 * 60_000));
+    expect(run(busy, fri(5, 0, 28)).get("brak", 1)).toBeUndefined();
+    expect(run(busy, fri(7, 0, 28)).get("brak", 1)?.at).toBe(fri(6, 0, 28));
+    // A drink in the quiet blocks spoils it.
+    expect(run([...busy, drink(1, fri(1, 0, 28))], fri(7, 0, 28)).get("brak", 1)).toBeUndefined();
   });
 });

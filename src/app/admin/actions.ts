@@ -178,7 +178,7 @@ export async function updateDrink(input: UpdateDrinkInput): Promise<Result> {
   return done();
 }
 
-/** Soft delete: the row stays (Sticky Fingers) but leaves every stat. */
+/** Soft delete: the row stays but leaves every stat. */
 export async function deleteDrink(input: { drinkId: number }): Promise<Result> {
   await requireAdmin();
   const p = z.object({ drinkId: id }).safeParse(input);

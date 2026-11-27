@@ -58,7 +58,7 @@ export function dayEndMs(key: string): number {
 
 /**
  * Replays the weekend in time order. The moments that are looked at are every drink, every
- * undo, the end of every hour that had a drink, 2 hours after every drink and the end of every
+ * undo, the end of every hour that had a drink, 2 hours after every drink, 3 blocks after every drink's block and the end of every
  * day (so group and block-based achievements settle at the right time), plus `now`. At each
  * moment every player who has drunk is checked, repeating until nothing new unlocks.
  */
@@ -77,6 +77,10 @@ export function evaluateAchievements(
     times.add(blockEnd(blockStart(d.at)));
     times.add(d.at + 2 * HOUR_MS);
     times.add(dayEndMs(dayKey(d.at)));
+    // End of the third whole block after this drink's block (Brak settles then).
+    let quiet = blockEnd(blockStart(d.at));
+    for (let i = 0; i < 3; i++) quiet = blockEnd(quiet);
+    times.add(quiet);
   }
   for (const d of deleted) times.add(d.deletedAt!);
   const timeline = [...times].filter((t) => t <= hub.now).sort((a, b) => a - b);
