@@ -9,6 +9,7 @@ const players: Player[] = ["Ana", "Ben", "Cy"].map((name, i) => ({
   slug: name.toLowerCase(),
   colorIndex: i,
   color: "#fff",
+  roomId: null,
 }));
 const H = Date.UTC(2026, 10, 27, 18); // Fri 19:00 Berlin
 let n = 0;

@@ -6,7 +6,9 @@ import { databaseUrl, getDb, schema } from "@/db";
 import { playerColor } from "./colors";
 import { CATEGORY_ICON, gramsOf, pointsOf, type Category, type DrinkKind } from "./drinks";
 
-export type Player = { id: number; name: string; slug: string; colorIndex: number; color: string };
+export type Player = { id: number; name: string; slug: string; colorIndex: number; color: string; roomId: number | null };
+
+export type Room = { id: number; name: string; icon: string };
 
 export type DrinkType = {
   id: number;
@@ -55,10 +57,11 @@ export { UNDO_MS as UNDO_WINDOW_MS } from "./logging";
 export const getHub = cache(async () => {
   await connection();
   const db = getDb();
-  const [playerRows, typeRows, drinkRows] = await Promise.all([
+  const [playerRows, typeRows, drinkRows, roomRows] = await Promise.all([
     db.select().from(schema.players).orderBy(asc(schema.players.name)),
     db.select().from(schema.drinkTypes).orderBy(asc(schema.drinkTypes.sortOrder), asc(schema.drinkTypes.id)),
     db.select().from(schema.drinks).orderBy(asc(schema.drinks.consumedAt), asc(schema.drinks.id)),
+    db.select().from(schema.rooms).orderBy(asc(schema.rooms.name)),
   ]);
 
   const players: Player[] = playerRows.map((p) => ({
@@ -67,6 +70,7 @@ export const getHub = cache(async () => {
     slug: p.slug,
     colorIndex: p.colorIndex,
     color: playerColor(p.colorIndex),
+    roomId: p.roomId,
   }));
   const drinkTypes: DrinkType[] = typeRows.map((t) => ({ ...t, abv: Number(t.abv), kind: (t.kind as DrinkKind | null) ?? null }));
   const typeById = new Map(drinkTypes.map((t) => [t.id, t]));
@@ -95,6 +99,8 @@ export const getHub = cache(async () => {
 
   return {
     players,
+    /** Rooms by name. */
+    rooms: roomRows.map((r): Room => ({ id: r.id, name: r.name, icon: r.icon })),
     playerById: new Map(players.map((p) => [p.id, p])),
     /** Whole menu including hidden items (the picker filters `hidden`). */
     drinkTypes,

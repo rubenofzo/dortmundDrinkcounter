@@ -12,7 +12,7 @@ export default async function LeaderboardPage({
 }) {
   const sp = await searchParams;
   const hub = await getHub();
-  const tab: Tab = sp.tab === "day" || sp.tab === "weekend" ? sp.tab : "hour";
+  const tab: Tab = sp.tab === "day" || sp.tab === "weekend" || sp.tab === "rooms" ? sp.tab : "hour";
   const h = sp.h && /^\d+$/.test(sp.h) ? Number(sp.h) : undefined;
   return <LeaderboardView hub={hub} tab={tab} h={h} d={sp.d} />;
 }

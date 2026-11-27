@@ -62,4 +62,5 @@ apply retroactively. The context fields are documented in
 - `src/lib/leaderboard.ts`, `stats.ts`, `metabolism.ts` – pure, tested calculations
 - `src/achievements/` – definitions and the replay engine
 - `src/app/` – pages: home, `leaderboard`, `people/[slug]`, `achievements`, `admin`
-- `src/db/schema.ts` – tables: players, drink_types, drinks; migrations in `drizzle/`
+- `src/db/schema.ts` – tables: rooms, players, drink_types, drinks; migrations in `drizzle/`
+- `src/lib/rooms.ts`, `src/app/roomActions.ts` – rooms of up to 4, managed by anyone on the People page

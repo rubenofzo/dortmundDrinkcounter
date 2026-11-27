@@ -3,17 +3,19 @@ import Link from "next/link";
 import { HallOfHours } from "@/components/HallOfHours";
 import { HourStrip, type StripChip } from "@/components/HourStrip";
 import { RankingList } from "@/components/RankingList";
+import { RoomRanking } from "@/components/RoomRanking";
 import { EmptyState, HallPanel, PageTitle, SectionTitle } from "@/components/ui";
 import type { Hub } from "@/lib/data";
 import { tripBlocks } from "@/lib/hours";
 import { blockWinners, rankDrinks } from "@/lib/leaderboard";
 import { blockEnd, blockLabel, blockStart, dayKey, dayLabel, TRIP_DAYS } from "@/lib/time";
 
-export type Tab = "hour" | "day" | "weekend";
+export type Tab = "hour" | "day" | "weekend" | "rooms";
 const TABS: { key: Tab; label: string }[] = [
   { key: "hour", label: "3 hours" },
   { key: "day", label: "Day" },
   { key: "weekend", label: "Weekend" },
+  { key: "rooms", label: "Rooms" },
 ];
 
 /** Leaderboard screen: tabs, chip strip, ranking. All selection lives in the URL. */
@@ -75,6 +77,8 @@ export function LeaderboardView({ hub, tab, h, d }: { hub: Hub; tab: Tab; h?: nu
         </HallPanel>
       </>
     );
+  } else if (tab === "rooms") {
+    body = <RoomRanking hub={hub} />;
   } else {
     const rows = rankDrinks(drinks, players);
     body = (
@@ -88,7 +92,7 @@ export function LeaderboardView({ hub, tab, h, d }: { hub: Hub; tab: Tab; h?: nu
   return (
     <div className="flex flex-col gap-4 md:gap-6">
       <PageTitle className="uppercase">Leaderboard</PageTitle>
-      <nav className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-hall-panel p-1" aria-label="Leaderboard range">
+      <nav className="grid grid-cols-4 gap-1 rounded-xl border border-line bg-hall-panel p-1" aria-label="Leaderboard range">
         {TABS.map((t) => (
           <Link
             key={t.key}
@@ -96,7 +100,7 @@ export function LeaderboardView({ hub, tab, h, d }: { hub: Hub; tab: Tab; h?: nu
             scroll={false}
             aria-current={t.key === tab ? "page" : undefined}
             className={clsx(
-              "flex min-h-12 items-center justify-center rounded-lg font-display text-lg uppercase",
+              "flex min-h-12 items-center justify-center rounded-lg font-display text-base uppercase md:text-lg",
               t.key === tab ? "bg-accent text-foam" : "text-mist hover:text-foam",
             )}
           >

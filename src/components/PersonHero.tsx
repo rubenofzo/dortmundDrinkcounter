@@ -1,4 +1,5 @@
-import type { Player } from "@/lib/data";
+import Link from "next/link";
+import type { Player, Room } from "@/lib/data";
 import { formatPoints } from "@/lib/drinks";
 import type { PlayerStats } from "@/lib/stats";
 import { formatClock } from "@/lib/time";
@@ -6,7 +7,7 @@ import { LoadSparkline } from "./AlcoholLoad";
 import { PlayerDot } from "./ui";
 
 /** Hero card of a person's page: name, totals and the big "Still in the system" KPI. */
-export function PersonHero({ player, s }: { player: Player; s: PlayerStats }) {
+export function PersonHero({ player, s, room }: { player: Player; s: PlayerStats; room?: Room | null }) {
   const load = s.load.current;
   return (
     <section className="overflow-hidden rounded-2xl bg-foam text-ink shadow-[0_12px_30px_rgba(0,0,0,0.35)] md:rounded-[20px]">
@@ -17,6 +18,11 @@ export function PersonHero({ player, s }: { player: Player; s: PlayerStats }) {
             <PlayerDot color={player.color} size={16} />
             <h1 className="font-display text-[34px] leading-none uppercase md:text-5xl">{player.name}</h1>
           </div>
+          {room && (
+            <Link href="/leaderboard?tab=rooms" className="-mt-1 inline-flex min-h-8 items-center gap-1.5 text-[14px] font-semibold text-ink-muted">
+              <span aria-hidden>{room.icon}</span> {room.name} →
+            </Link>
+          )}
           <dl className="grid grid-cols-3 gap-2 text-center md:text-left">
             <Big label="Points" value={formatPoints(s.points)} />
             <Big label="Drinks" value={String(s.drinks)} />
