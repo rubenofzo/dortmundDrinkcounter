@@ -78,10 +78,12 @@ describe("achievement engine", () => {
     expect(run(drinks, fri(21, 5)).get("hour-champion", 2)).toBeUndefined();
   });
 
-  it("Early Bird goes to the first drinker of the day only", () => {
-    const { get } = run([drink(2, fri(12)), drink(1, fri(13))], fri(15));
-    expect(get("early-bird", 2)?.at).toBe(fri(12));
+  it("Early Bird: any drink between midnight and 01:00", () => {
+    const { get } = run([drink(2, fri(24, 59)), drink(1, fri(25)), drink(3, fri(23, 59)), drink(4, fri(24))], fri(27));
+    expect(get("early-bird", 2)?.at).toBe(fri(24, 59));
+    expect(get("early-bird", 4)?.at).toBe(fri(24));
     expect(get("early-bird", 1)).toBeUndefined();
+    expect(get("early-bird", 3)).toBeUndefined();
   });
 
   it("Century: everyone who drank on a 100-point day gets it, when they drank", () => {

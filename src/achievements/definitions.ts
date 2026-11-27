@@ -144,6 +144,8 @@ function zombie(c: AchievementContext): boolean {
 }
 
 const CENTURY = 100;
+/** Early Bird: a drink in this Berlin clock hour (0 = midnight to 01:00). */
+const EARLY_BIRD_HOUR = 0;
 
 export const achievements: AchievementDefinition[] = [
   {
@@ -210,10 +212,10 @@ export const achievements: AchievementDefinition[] = [
   {
     id: "early-bird",
     name: "Early Bird",
-    description: "Make the first drink of the whole group on a day.",
+    description: "Have a drink between midnight and 01:00.",
     icon: "🌅",
     tier: "uncommon",
-    check: (c) => [...c.days.values()].some((day) => day.firstIds.has(c.player.id)),
+    check: (c) => c.mine.some((d) => hourOf(d) === EARLY_BIRD_HOUR),
   },
 
   {
