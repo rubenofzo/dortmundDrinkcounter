@@ -49,7 +49,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <ThisHourBoard hub={hub} meId={me?.id} />
       <LatestFeed hub={hub} />
       <HallPanel>
-        <SectionTitle className="mb-2 uppercase">Points per 3 hours</SectionTitle>
+        <SectionTitle className="mb-2 uppercase">Points over time</SectionTitle>
         {chart.points.length === 0 ? <p className="text-mist">The chart starts with the first drink.</p> : <HourChart points={chart.points} series={chart.series} />}
       </HallPanel>
       <StillInSystem hub={hub} />
