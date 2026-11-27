@@ -26,7 +26,6 @@ function maxPerBucket(ctx: AchievementContext, test: (d: Drink) => boolean, buck
   return best;
 }
 
-const isCustom = (d: Drink) => d.category === "Custom" || d.drinkTypeId === null;
 
 /** Longest run of consecutive hour buckets (in ms) in a sorted list of distinct hour starts. */
 function longestHourRun(hours: number[]): number {
@@ -144,7 +143,6 @@ function zombie(c: AchievementContext): boolean {
   return c.mine.some((d) => hourOf(d) >= 6 && hourOf(d) < 10 && early.has(calendarDate(d.at)));
 }
 
-const STEADY_HOURS = [20, 21, 22, 23, 0];
 const CENTURY = 100;
 
 export const achievements: AchievementDefinition[] = [
@@ -201,21 +199,8 @@ export const achievements: AchievementDefinition[] = [
     check: (c) => maxPerBucket(c, (d) => d.category === "Shots", (d) => blockStart(d.at)) >= 3,
     progress: (c) => [maxPerBucket(c, (d) => d.category === "Shots", (d) => blockStart(d.at)), 3],
   },
-  {
-    id: "wine-mom",
-    name: "Wine Mom",
-    description: "4 glasses of wine in one day.",
-    icon: "🍷",
-    check: (c) => maxPerBucket(c, (d) => d.category === "Wine", (d) => dayKey(d.at)) >= 4,
-    progress: (c) => [maxPerBucket(c, (d) => d.category === "Wine", (d) => dayKey(d.at)), 4],
-  },
-  {
-    id: "mad-scientist",
-    name: "Mad Scientist",
-    description: "Log a custom drink.",
-    icon: "🧪",
-    check: (c) => c.mine.some(isCustom),
-  },
+
+
   {
     id: "early-bird",
     name: "Early Bird",
@@ -223,17 +208,7 @@ export const achievements: AchievementDefinition[] = [
     icon: "🌅",
     check: (c) => [...c.days.values()].some((day) => day.firstIds.has(c.player.id)),
   },
-  {
-    id: "breakfast-of-champions",
-    name: "Breakfast of Champions",
-    description: "A drink between 06:00 and 11:00.",
-    icon: "🥞",
-    check: (c) =>
-      c.mine.some((d) => {
-        const h = berlinParts(d.at).hour;
-        return h >= 6 && h < 11;
-      }),
-  },
+
   {
     id: "last-one-standing",
     name: "Last One Standing",
@@ -264,17 +239,7 @@ export const achievements: AchievementDefinition[] = [
     icon: "💯",
     check: (c) => [...c.days.values()].some((day) => day.points >= CENTURY && day.playerIds.has(c.player.id)),
   },
-  {
-    id: "steady-eddie",
-    name: "Steady Eddie",
-    description: "At least 1 drink in every hour from 20:00 to 01:00 on one night.",
-    icon: "🐢",
-    check: (c) => [...clockHoursByDay(c).values()].some((hours) => STEADY_HOURS.every((h) => hours.has(h))),
-    progress: (c) => [
-      Math.max(0, ...[...clockHoursByDay(c).values()].map((hours) => STEADY_HOURS.filter((h) => hours.has(h)).length)),
-      STEADY_HOURS.length,
-    ],
-  },
+
   {
     id: "comeback-kid",
     name: "Comeback Kid",
@@ -359,13 +324,7 @@ export const achievements: AchievementDefinition[] = [
     check: (c) => count(c, isSekt) >= 5,
     progress: (c) => [count(c, isSekt), 5],
   },
-  {
-    id: "sunrise-session",
-    name: "Sunrise Session",
-    description: "A drink between 05:00 and 08:00.",
-    icon: "🌄",
-    check: (c) => c.mine.some((d) => hourOf(d) >= 5 && hourOf(d) < 8),
-  },
+
   {
     id: "night-shift",
     name: "Night Shift",
@@ -459,4 +418,18 @@ export const achievements: AchievementDefinition[] = [
     hidden: true,
     check: brak,
   },
+  {
+    id: "completionist",
+    name: "Completionist",
+    description: "Unlock every other achievement.",
+    icon: "👑",
+    check: (c) => othersUnlocked(c) >= OTHER_COUNT,
+    progress: (c) => [othersUnlocked(c), OTHER_COUNT],
+  },
 ];
+
+/** Every achievement except Completionist itself. */
+const OTHER_COUNT = achievements.length - 1;
+function othersUnlocked(c: AchievementContext): number {
+  return [...c.unlockedIds].filter((id) => id !== "completionist").length;
+}

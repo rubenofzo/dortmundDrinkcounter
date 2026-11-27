@@ -100,6 +100,14 @@ describe("achievement engine", () => {
     expect(late.get("last-one-standing", 1)).toBeUndefined();
   });
 
+  it("Completionist counts the other 30 achievements", () => {
+    const { r, get } = run([drink(1, fri(20))], fri(21));
+    expect(r.summaries).toHaveLength(31);
+    const mine = r.byPlayer.get(1)!.find((a) => a.definition.id === "completionist")!;
+    expect(mine.progress?.[1]).toBe(30);
+    expect(get("completionist", 1)).toBeUndefined();
+  });
+
   it("never looks at who logged the drink", () => {
     const a = run([drink(1, fri(20))], fri(21));
     const b = run([{ ...drink(1, fri(20)), loggedByPlayerId: 2 }], fri(21));
@@ -134,12 +142,7 @@ describe("achievement engine", () => {
     expect(run([drink(1, fri(24 + 4)), drink(1, fri(24 + 11))], fri(24 + 12)).get("zombie-mode", 1)).toBeUndefined();
   });
 
-  it("Sunrise Session covers 05:00 to 08:00", () => {
-    expect(run([drink(1, fri(24 + 5))], fri(24 + 9)).get("sunrise-session", 1)?.at).toBe(fri(24 + 5));
-    expect(run([drink(1, fri(24 + 7, 59))], fri(24 + 9)).get("sunrise-session", 1)).toBeDefined();
-    expect(run([drink(1, fri(24 + 8))], fri(24 + 9)).get("sunrise-session", 1)).toBeUndefined();
-    expect(run([drink(1, fri(24 + 4, 59))], fri(24 + 9)).get("sunrise-session", 1)).toBeUndefined();
-  });
+
 });
 
 describe("Glühwein achievements", () => {
