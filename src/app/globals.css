@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+/* Beer Hall palette: dark wood hall, foam-white cards, signature red accent, with black-and-yellow Dortmund touches (gold). */
+@theme {
+  --color-hall: #1a140c;
+  --color-hall-light: #2a2014;
+  --color-hall-deep: #0d0a06;
+  --color-hall-panel: rgb(36 28 16 / 0.6);
+  --color-line: #4a3b22;
+  --color-mist: #c2b294;
+  --color-foam: #fbf5e6;
+  --color-foam-line: #e9dcbc;
+  --color-ink: #17120a;
+  --color-ink-muted: #6a5a3c;
+  --color-accent: #e53a2f;
+  --color-accent-light: #ff6a5c;
+  --color-accent-dark: #a5170f;
+  --color-gold: #f5b301;
+  --color-gold-dark: #8a6200;
+  --color-hop: #8fdc8a;
+  --color-hop-dark: #2b6b31;
+  --color-chip: #ff8a65;
+  --color-chip-dark: #b2391b;
+
+  --font-display: var(--font-oswald), Impact, sans-serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+}
+
+html {
+  background: var(--color-hall-deep);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 50% 0%, var(--color-hall-light) 0%, var(--color-hall) 45%, var(--color-hall-deep) 100%)
+    no-repeat;
+  background-color: var(--color-hall-deep);
+  color: var(--color-foam);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+dialog::backdrop {
+  background: rgb(8 6 3 / 0.78);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Red-and-black stripe on headers and hero cards. */
+.stripe {
+  background: repeating-linear-gradient(-45deg, var(--color-accent) 0 10px, var(--color-ink) 10px 20px);
+}
+
+/* Horizontal scroll strips on phones: swipeable, without a visible scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
