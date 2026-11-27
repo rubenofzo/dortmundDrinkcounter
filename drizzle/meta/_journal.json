@@ -22,6 +22,20 @@
       "when": 1795781033395,
       "tag": "0002_add_gluhwein",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795795104824,
+      "tag": "0003_custom_drink_flag",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795795349683,
+      "tag": "0004_custom_drink_kind",
+      "breakpoints": true
     }
   ]
 }

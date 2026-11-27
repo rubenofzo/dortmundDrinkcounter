@@ -7,6 +7,22 @@ export const CATEGORIES = ["Beer", "Wine", "Mixed", "Shots"] as const;
 export type MenuCategory = (typeof CATEGORIES)[number];
 export type Category = MenuCategory | "Custom";
 
+/** Special drinks some achievements look for; a custom drink can count as one of these. */
+export const DRINK_KINDS = ["weizen", "gluhwein", "jager"] as const;
+export type DrinkKind = (typeof DRINK_KINDS)[number];
+
+/** "Counts as" choices for a custom drink: a category, optionally a special kind within it. */
+export const COUNTS_AS: { label: string; icon: string; category: Category; kind: DrinkKind | null }[] = [
+  { label: "Beer", icon: "🍺", category: "Beer", kind: null },
+  { label: "Weizen", icon: "🌾", category: "Beer", kind: "weizen" },
+  { label: "Wine", icon: "🍷", category: "Wine", kind: null },
+  { label: "Glühwein", icon: "🎄", category: "Wine", kind: "gluhwein" },
+  { label: "Mixed", icon: "🍹", category: "Mixed", kind: null },
+  { label: "Shot", icon: "🥃", category: "Shots", kind: null },
+  { label: "Jäger", icon: "🌿", category: "Shots", kind: "jager" },
+  { label: "Other", icon: "🧪", category: "Custom", kind: null },
+];
+
 export const CATEGORY_ICON: Record<Category, string> = {
   Beer: "🍺",
   Wine: "🍷",

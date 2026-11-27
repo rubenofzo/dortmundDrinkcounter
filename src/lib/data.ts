@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { cache } from "react";
 import { databaseUrl, getDb, schema } from "@/db";
 import { playerColor } from "./colors";
-import { CATEGORY_ICON, gramsOf, pointsOf, type Category } from "./drinks";
+import { CATEGORY_ICON, gramsOf, pointsOf, type Category, type DrinkKind } from "./drinks";
 
 export type Player = { id: number; name: string; slug: string; colorIndex: number; color: string };
 
@@ -17,6 +17,10 @@ export type DrinkType = {
   abv: number;
   sortOrder: number;
   hidden: boolean;
+  /** Saved from the custom drink form. */
+  custom: boolean;
+  /** Special kind a custom drink counts as, if any. */
+  kind: DrinkKind | null;
 };
 
 export type Drink = {
@@ -25,6 +29,8 @@ export type Drink = {
   drinkTypeId: number | null;
   name: string;
   category: Category;
+  /** From the drink's menu item: a custom drink that counts as Weizen, Glühwein or Jäger. */
+  kind: DrinkKind | null;
   icon: string;
   ml: number;
   abv: number;
@@ -62,7 +68,7 @@ export const getHub = cache(async () => {
     colorIndex: p.colorIndex,
     color: playerColor(p.colorIndex),
   }));
-  const drinkTypes: DrinkType[] = typeRows.map((t) => ({ ...t, abv: Number(t.abv) }));
+  const drinkTypes: DrinkType[] = typeRows.map((t) => ({ ...t, abv: Number(t.abv), kind: (t.kind as DrinkKind | null) ?? null }));
   const typeById = new Map(drinkTypes.map((t) => [t.id, t]));
 
   const all: Drink[] = drinkRows.map((d) => {
@@ -74,6 +80,7 @@ export const getHub = cache(async () => {
       drinkTypeId: d.drinkTypeId,
       name: d.name,
       category,
+      kind: (d.drinkTypeId && typeById.get(d.drinkTypeId)?.kind) || null,
       icon: (d.drinkTypeId && typeById.get(d.drinkTypeId)?.icon) || CATEGORY_ICON[category] || "🍺",
       ml: d.ml,
       abv,

@@ -13,13 +13,17 @@ export const players = pgTable("players", {
 export const drinkTypes = pgTable("drink_types", {
   id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
-  /** "Beer" | "Wine" | "Mixed" | "Shots" (see `CATEGORIES` in `src/lib/drinks.ts`). */
+  /** "Beer" | "Wine" | "Mixed" | "Shots" (see `CATEGORIES` in `src/lib/drinks.ts`), or "Custom" for "Other". */
   category: text("category").notNull(),
   icon: text("icon").notNull(),
   ml: integer("ml").notNull(),
   abv: numeric("abv", { precision: 4, scale: 1, mode: "number" }).notNull(),
   sortOrder: integer("sort_order").notNull().default(0),
   hidden: boolean("hidden").notNull().default(false),
+  /** Saved from the custom drink form: shown under "Custom drinks" in the picker, whatever its category. */
+  custom: boolean("custom").notNull().default(false),
+  /** Custom drinks only: "weizen" | "gluhwein" | "jager" (see `DRINK_KINDS`), for the achievements that look for them. */
+  kind: text("kind"),
 });
 
 export const drinks = pgTable(

@@ -25,6 +25,18 @@ describe("logDrinkSchema", () => {
   });
 });
 
+describe("custom drink category", () => {
+  it("defaults to Other (Custom) and accepts a menu category", () => {
+    const plain = logDrinkSchema.parse({ playerId: 1, custom: { name: "Kölsch", ml: 200, abv: 4.8 } });
+    expect(plain.custom?.category).toBe("Custom");
+    const beer = logDrinkSchema.parse({ playerId: 1, custom: { name: "Kölsch", ml: 200, abv: 4.8, category: "Beer" } });
+    expect(beer.custom?.category).toBe("Beer");
+  });
+  it("rejects an unknown category", () => {
+    expect(logDrinkSchema.safeParse({ playerId: 1, custom: { name: "x", ml: 40, abv: 40, category: "Juice" } }).success).toBe(false);
+  });
+});
+
 describe("own size for menu drinks", () => {
   it("accepts a menu drink with an ml override, within limits", () => {
     expect(logDrinkSchema.safeParse({ playerId: 1, drinkTypeId: 2, ml: 1000 }).success).toBe(true);

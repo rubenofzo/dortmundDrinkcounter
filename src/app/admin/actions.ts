@@ -7,6 +7,7 @@ import { z } from "zod";
 import { getDb, schema } from "@/db";
 import { endAdminSession, passwordMatches, requireAdmin, startAdminSession } from "@/lib/auth";
 import { CATEGORIES } from "@/lib/drinks";
+import { recategorise } from "@/lib/recategorise";
 import { cleanName, slugify } from "@/lib/names";
 
 export type LoginState = { error?: string };
@@ -120,7 +121,7 @@ export async function addDrinkType(input: MenuInput): Promise<Result> {
   return done();
 }
 
-/** Edits the menu only; logged drinks keep their own copy of name, ml and ABV. */
+/** Edits the menu; logged drinks keep their own name, ml and ABV (a custom drink's category does carry over). */
 export async function updateDrinkType(input: MenuInput & { drinkTypeId: number }): Promise<Result> {
   await requireAdmin();
   const p = menuSchema.extend({ drinkTypeId: id }).safeParse(input);
@@ -131,8 +132,10 @@ export async function updateDrinkType(input: MenuInput & { drinkTypeId: number }
       .update(schema.drinkTypes)
       .set(values)
       .where(eq(schema.drinkTypes.id, drinkTypeId))
-      .returning({ id: schema.drinkTypes.id });
+      .returning({ id: schema.drinkTypes.id, custom: schema.drinkTypes.custom });
     if (updated.length === 0) return fail("That menu item no longer exists.");
+    // A saved custom drink's category also moves its logged drinks, so achievements follow it.
+    if (updated[0].custom) await recategorise(getDb(), drinkTypeId, values.category);
   } catch (err) {
     if (isUniqueViolation(err)) return fail("A menu item with that name exists.");
     throw err;

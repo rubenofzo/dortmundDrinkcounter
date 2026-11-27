@@ -6,7 +6,7 @@ import { bestHour, dayEdges, longestDrySpell, longestStreak, playerStats, totals
 const berlin = (d: number, h: number, m = 0) => Date.UTC(2026, 10, d, h - 1, m);
 let id = 0;
 const drink = (at: number, points = 1, playerId = 1): Drink => ({
-  id: ++id, playerId, drinkTypeId: 1, name: "Pils", category: "Beer", icon: "🍺", ml: 500, abv: 4.8, at,
+  id: ++id, playerId, drinkTypeId: 1, name: "Pils", category: "Beer", kind: null, icon: "🍺", ml: 500, abv: 4.8, at,
   loggedByPlayerId: null, createdAt: at, deletedAt: null, grams: points * 10, points,
 });
 
