@@ -1,17 +1,14 @@
 import type { Hub } from "@/lib/data";
 import { formatPoints } from "@/lib/drinks";
-import { categoryMix, groupStats, litreComparison } from "@/lib/stats";
-import { blockLabel, blockStart, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
-import { CategoryPie } from "./CategoryMix";
+import { groupStats, litreComparison } from "@/lib/stats";
+import { blockLabel, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
 import { ShowMore } from "./ShowMore";
 import { CardPanel, KpiCard, PlayerDot, SectionTitle } from "./ui";
 
-/** Group fun stats for the home page: KPI cards, drinks per category pie, share per person. */
+/** Group fun stats for the home page: KPI cards and share per person. */
 export function GroupStats({ hub }: { hub: Hub }) {
   const g = groupStats(hub.drinks, hub.players, hub.now);
   const totalPoints = g.points || 1;
-  const thisBlock = blockStart(hub.now);
-  const blockMix = categoryMix(hub.drinks.filter((d) => blockStart(d.at) === thisBlock));
   const foldShares = g.shares.length > 7;
   const shareRow = (s: (typeof g.shares)[number]) => (
                 <li key={s.player.id} className="flex flex-col gap-1">
@@ -81,27 +78,21 @@ export function GroupStats({ hub }: { hub: Hub }) {
         </CardPanel>
       )}
 
-      <div className="grid gap-3 md:grid-cols-2 md:gap-5">
-        <CardPanel>
-          <h3 className="mb-2 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">This block · {blockLabel(thisBlock)}</h3>
-          <CategoryPie mix={blockMix} empty="No drinks this block yet." />
-        </CardPanel>
-        <CardPanel>
-          <h3 className="mb-3 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Share of the group total</h3>
-          {g.shares.length === 0 ? (
-            <p className="text-sm text-ink-muted">No drinks yet.</p>
-          ) : (
-            <>
-              <ul className="flex flex-col gap-2.5">{(foldShares ? g.shares.slice(0, 5) : g.shares).map(shareRow)}</ul>
-              {foldShares && (
-                <ShowMore tone="card" label={`Show all ${g.shares.length}`}>
-                  <ul className="mt-2.5 flex flex-col gap-2.5">{g.shares.slice(5).map(shareRow)}</ul>
-                </ShowMore>
-              )}
-            </>
-          )}
-        </CardPanel>
-      </div>
+      <CardPanel>
+        <h3 className="mb-3 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Share of the group total</h3>
+        {g.shares.length === 0 ? (
+          <p className="text-sm text-ink-muted">No drinks yet.</p>
+        ) : (
+          <>
+            <ul className="flex flex-col gap-2.5">{(foldShares ? g.shares.slice(0, 5) : g.shares).map(shareRow)}</ul>
+            {foldShares && (
+              <ShowMore tone="card" label={`Show all ${g.shares.length}`}>
+                <ul className="mt-2.5 flex flex-col gap-2.5">{g.shares.slice(5).map(shareRow)}</ul>
+              </ShowMore>
+            )}
+          </>
+        )}
+      </CardPanel>
     </section>
   );
 }
