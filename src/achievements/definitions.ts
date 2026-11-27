@@ -151,6 +151,7 @@ export const achievements: AchievementDefinition[] = [
     name: "First Round",
     description: "Log your first drink.",
     icon: "🍺",
+    tier: "common",
     check: (c) => c.mine.length >= 1,
   },
   {
@@ -158,6 +159,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Prost!",
     description: "Drink within 2 minutes of 3 or more others.",
     icon: "🍻",
+    tier: "common",
     check: (c) =>
       c.mine.some((m) => {
         const others = new Set<number>();
@@ -172,6 +174,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Block Champion",
     description: "Win a 3-hour block on the leaderboard.",
     icon: "👑",
+    tier: "uncommon",
     check: (c) => c.blockWins.length >= 1,
     progress: (c) => [c.blockWins.length, 1],
   },
@@ -180,6 +183,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Hat Trick",
     description: "Win 3 blocks.",
     icon: "🎩",
+    tier: "rare",
     check: (c) => c.blockWins.length >= 3,
     progress: (c) => [c.blockWins.length, 3],
   },
@@ -188,6 +192,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Dynasty",
     description: "Win 3 blocks in a row.",
     icon: "🏰",
+    tier: "ultra",
     check: (c) => winRun(c.blockWins) >= 3,
     progress: (c) => [winRun(c.blockWins), 3],
   },
@@ -196,6 +201,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Shot Caller",
     description: "3 shots in one block.",
     icon: "🎯",
+    tier: "uncommon",
     check: (c) => maxPerBucket(c, (d) => d.category === "Shots", (d) => blockStart(d.at)) >= 3,
     progress: (c) => [maxPerBucket(c, (d) => d.category === "Shots", (d) => blockStart(d.at)), 3],
   },
@@ -206,6 +212,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Early Bird",
     description: "Make the first drink of the whole group on a day.",
     icon: "🌅",
+    tier: "uncommon",
     check: (c) => [...c.days.values()].some((day) => day.firstIds.has(c.player.id)),
   },
 
@@ -214,6 +221,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Last One Standing",
     description: "Make the last drink of the group on a night (after 02:00).",
     icon: "🦉",
+    tier: "rare",
     // A night is settled once nobody has drunk for 2 hours or the day has ended (06:00),
     // so the badge isn't handed out and then taken by a later drink. Later drinks don't revoke it.
     check: (c) =>
@@ -229,6 +237,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Marathon",
     description: "A drink in 6 consecutive hours.",
     icon: "🏃",
+    tier: "rare",
     check: (c) => longestHourRun(distinctHours(c)) >= 6,
     progress: (c) => [longestHourRun(distinctHours(c)), 6],
   },
@@ -237,6 +246,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Century",
     description: "The group reaches 100 points in a day. Everyone who drank that day gets it.",
     icon: "💯",
+    tier: "common",
     check: (c) => [...c.days.values()].some((day) => day.points >= CENTURY && day.playerIds.has(c.player.id)),
   },
 
@@ -245,6 +255,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Comeback Kid",
     description: "Win a block after a whole block (3 hours) with no drinks.",
     icon: "🔁",
+    tier: "rare",
     check: (c) =>
       c.blockWins.some((b) => {
         const prev = blockStart(b - 1);
@@ -256,6 +267,7 @@ export const achievements: AchievementDefinition[] = [
     name: "All-Rounder",
     description: "A beer, a wine, a mixed drink and a shot in one day.",
     icon: "🎨",
+    tier: "uncommon",
     check: (c) => [...categoriesByDay(c).values()].some((cats) => ["Beer", "Wine", "Mixed", "Shots"].every((k) => cats.has(k))),
     progress: (c) => [
       Math.max(0, ...[...categoriesByDay(c).values()].map((cats) => ["Beer", "Wine", "Mixed", "Shots"].filter((k) => cats.has(k)).length)),
@@ -267,6 +279,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Weekend Warrior",
     description: "Drink on all three days of the trip.",
     icon: "🗓️",
+    tier: "common",
     check: (c) => {
       const days = new Set(c.mine.map((d) => dayKey(d.at)));
       return TRIP_DAYS.every((k) => days.has(k));
@@ -281,6 +294,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Quarter Century",
     description: "25 drinks in total.",
     icon: "🥉",
+    tier: "rare",
     check: (c) => c.mine.length >= 25,
     progress: (c) => [c.mine.length, 25],
   },
@@ -289,6 +303,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Half Century",
     description: "50 drinks in total.",
     icon: "🎖️",
+    tier: "ultra",
     check: (c) => c.mine.length >= 50,
     progress: (c) => [c.mine.length, 50],
   },
@@ -297,6 +312,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Human Keg",
     description: "10 litres in total.",
     icon: "🛢️",
+    tier: "ultra",
     check: (c) => totalMl(c) >= 10000,
     progress: (c) => [Math.round(totalMl(c) / 100) / 10, 10],
   },
@@ -305,6 +321,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Beer Baron",
     description: "20 beers in total.",
     icon: "🤴",
+    tier: "rare",
     check: (c) => count(c, (d) => d.category === "Beer") >= 20,
     progress: (c) => [count(c, (d) => d.category === "Beer"), 20],
   },
@@ -313,6 +330,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Jäger Squad",
     description: "5 Jägermeisters in total.",
     icon: "🌿",
+    tier: "uncommon",
     check: (c) => count(c, isJaeger) >= 5,
     progress: (c) => [count(c, isJaeger), 5],
   },
@@ -321,6 +339,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Prosecco Problems",
     description: "5 Sekt or Prosecco in total.",
     icon: "🥂",
+    tier: "uncommon",
     check: (c) => count(c, isSekt) >= 5,
     progress: (c) => [count(c, isSekt), 5],
   },
@@ -330,6 +349,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Night Shift",
     description: "At least 1 drink in every hour from 22:00 to 04:00 on one night.",
     icon: "🌙",
+    tier: "ultra",
     check: (c) => nightHours(c) >= NIGHT_HOURS.length,
     progress: (c) => [nightHours(c), NIGHT_HOURS.length],
   },
@@ -338,6 +358,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Zombie Mode",
     description: "A drink between 03:00 and 06:00 and another between 06:00 and 10:00 the same morning.",
     icon: "🧟",
+    tier: "rare",
     check: zombie,
   },
   {
@@ -345,6 +366,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Weißwurst Breakfast",
     description: "A Weizen before 12:00.",
     icon: "🌭",
+    tier: "common",
     check: (c) => c.mine.some((d) => isWeizen(d) && hourOf(d) >= 6 && hourOf(d) < 12),
   },
   // Glühwein (Christmas markets).
@@ -353,6 +375,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Christkindl",
     description: "Drink your first Glühwein.",
     icon: "🎄",
+    tier: "common",
     check: (c) => c.mine.some(isGluhwein),
   },
   {
@@ -360,6 +383,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Warm Hands",
     description: "3 Glühweins in one day.",
     icon: "🔥",
+    tier: "uncommon",
     check: (c) => gluhweinPerDay(c) >= 3,
     progress: (c) => [gluhweinPerDay(c), 3],
   },
@@ -368,6 +392,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Glühwein Goblin",
     description: "5 Glühweins in one day.",
     icon: "🧌",
+    tier: "rare",
     check: (c) => gluhweinPerDay(c) >= 5,
     progress: (c) => [gluhweinPerDay(c), 5],
   },
@@ -376,6 +401,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Rudolph the Red-Nosed Reindeer",
     description: "10 Glühweins in one day.",
     icon: "🦌",
+    tier: "ultra",
     check: (c) => gluhweinPerDay(c) >= 10,
     progress: (c) => [gluhweinPerDay(c), 10],
   },
@@ -384,6 +410,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Market Crawl",
     description: "A Glühwein in 3 different 3-hour blocks on one day.",
     icon: "🧣",
+    tier: "uncommon",
     check: (c) => marketCrawl(c) >= 3,
     progress: (c) => [marketCrawl(c), 3],
   },
@@ -392,6 +419,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Glühwein Weekend",
     description: "A Glühwein on all three days of the trip.",
     icon: "🌨️",
+    tier: "rare",
     check: (c) => {
       const days = new Set(c.mine.filter(isGluhwein).map((d) => dayKey(d.at)));
       return TRIP_DAYS.every((k) => days.has(k));
@@ -407,6 +435,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Déjà Vu",
     description: "The same drink 5 times in a row.",
     icon: "🔂",
+    tier: "rare",
     hidden: true,
     check: (c) => sameInARow(c) >= 5,
   },
@@ -415,6 +444,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Brak",
     description: "10 drinks in 3 blocks in a row, then 3 blocks without a single drink.",
     icon: "🤮",
+    tier: "ultra",
     hidden: true,
     check: brak,
   },
@@ -423,6 +453,7 @@ export const achievements: AchievementDefinition[] = [
     name: "Completionist",
     description: "Unlock every other achievement.",
     icon: "👑",
+    tier: "ultra",
     check: (c) => othersUnlocked(c) >= OTHER_COUNT,
     progress: (c) => [othersUnlocked(c), OTHER_COUNT],
   },

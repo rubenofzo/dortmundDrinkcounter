@@ -47,7 +47,9 @@ Checks: `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`.
 ## Adding an achievement
 
 Achievements live in [`src/achievements/definitions.ts`](src/achievements/definitions.ts):
-an `id` (unique and stable), `name`, `description`, `icon` (an emoji), optional `hidden`,
+an `id` (unique and stable), `name`, `description`, `icon` (an emoji), a `tier` for how hard
+it is ("common", "uncommon", "rare" or "ultra"; it sets the rarity shown, not the share of
+players who have it), optional `hidden`,
 a `check(c)` and an optional `progress(c)`. The engine replays every drink in time order,
 so the first moment `check` passes becomes the unlock time and new or edited achievements
 apply retroactively. The context fields are documented in

@@ -1,4 +1,5 @@
 import type { Drink, Player } from "@/lib/data";
+import type { RarityTier } from "./rarity";
 
 /** What happened on one 06:00-to-06:00 day, as of the moment being evaluated. */
 export type DayInfo = {
@@ -47,6 +48,8 @@ export type AchievementDefinition = {
   description: string;
   /** One or two characters (an emoji). */
   icon: string;
+  /** How hard it is to get. Fixed per achievement, not based on how many people have it. */
+  tier: RarityTier;
   /** Hidden achievements show as ??? until someone earns them. */
   hidden?: boolean;
   /** True once the player has earned it. */

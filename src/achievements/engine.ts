@@ -2,10 +2,10 @@ import type { Drink, Player } from "@/lib/data";
 import { blockWinners } from "@/lib/leaderboard";
 import { berlinParts, blockEnd, blockStart, dayKey, HOUR_MS, hourStart } from "@/lib/time";
 import { achievements as defaultDefinitions } from "./definitions";
-import { rarityTier, TIER_LABEL, type RarityTier } from "./rarity";
+import { TIER_LABEL, type RarityTier } from "./rarity";
 import type { AchievementContext, AchievementDefinition, DayInfo } from "./types";
 
-export { rarityTier, TIER_LABEL };
+export { TIER_LABEL };
 export type { RarityTier };
 
 /** The part of the hub the engine reads. */
@@ -148,7 +148,7 @@ export function evaluateAchievements(
   const summaries: AchievementSummary[] = definitions.map((definition) => {
     const unlocks = all.filter((u) => u.achievementId === definition.id).sort((a, b) => a.at - b.at || a.playerId - b.playerId);
     const rarity = drinkers.length ? unlocks.length / drinkers.length : 0;
-    return { definition, rarity, tier: rarityTier(rarity), unlocks };
+    return { definition, rarity, tier: definition.tier, unlocks };
   });
   const summaryById = new Map(summaries.map((s) => [s.definition.id, s]));
 
