@@ -3,6 +3,7 @@ import { Manrope, Oswald } from "next/font/google";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { BottomNav } from "@/components/BottomNav";
 import { SiteHeader } from "@/components/SiteHeader";
+import { UnlockToastHost } from "@/components/UnlockToastHost";
 import { HallPanel } from "@/components/ui";
 import { getSetupProblem } from "@/lib/data";
 import "./globals.css";
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {children}
               <BottomNav />
               <AutoRefresh seconds={15} />
+              <UnlockToastHost />
             </>
           )}
         </div>

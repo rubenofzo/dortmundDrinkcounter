@@ -40,7 +40,7 @@ export type Drink = {
 };
 
 /** Undo is open to anyone for this long after logging; after that only the admin can delete. */
-export const UNDO_WINDOW_MS = 2 * 60_000;
+export { UNDO_MS as UNDO_WINDOW_MS } from "./logging";
 
 /**
  * Loads everything once per request; every stat, leaderboard and achievement is derived from
@@ -107,6 +107,8 @@ export async function getSetupProblem(): Promise<string | null> {
   if (!databaseUrl()) {
     return "DATABASE_URL is not set. On Vercel, connect a Neon database under Storage, then redeploy.";
   }
+  // Outside the try, so Next's "render dynamically" signal isn't mistaken for a database error.
+  await connection();
   try {
     await getHub();
     return null;
