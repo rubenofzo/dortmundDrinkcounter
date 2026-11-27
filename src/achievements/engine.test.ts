@@ -100,24 +100,6 @@ describe("achievement engine", () => {
     expect(late.get("last-one-standing", 1)).toBeUndefined();
   });
 
-  it("Collector unlocks after 10 other achievements, at the same moment", () => {
-    // Anna: First Round, Mad Scientist, Weißwurst Breakfast, Christkindl, All-Rounder, block wins, etc.
-    const types = Array.from({ length: 6 }, (_, i) => drink(1, fri(12 + i), { drinkTypeId: i + 1, name: `T${i}` }));
-    const more = [
-      ...Array.from({ length: 5 }, (_, i) => drink(1, fri(18) + i * 60_000)), // beers
-      drink(1, fri(19), { drinkTypeId: null, category: "Custom", name: "Mix" }), // mad scientist
-      drink(1, fri(10), { name: "Aperol Spritz", category: "Mixed", drinkTypeId: 20 }), // mixed
-      drink(1, fri(8), { name: "Weizen", drinkTypeId: 21 }), // breakfast
-      drink(1, fri(13, 30), { name: "Glühwein", category: "Wine", drinkTypeId: 22 }), // christkindl
-      drink(1, fri(14, 30), { name: "Shot", category: "Shots", drinkTypeId: 23 }), // all-rounder
-    ];
-    const { get, r } = run([...types, ...more], fri(23));
-    const got = r.byPlayer.get(1)!.filter((a) => a.unlocked && a.definition.id !== "collector").length;
-    expect(got).toBeGreaterThanOrEqual(10);
-    expect(get("collector", 1)).toBeDefined();
-    expect(get("collector", 2)).toBeUndefined();
-  });
-
   it("never looks at who logged the drink", () => {
     const a = run([drink(1, fri(20))], fri(21));
     const b = run([{ ...drink(1, fri(20)), loggedByPlayerId: 2 }], fri(21));

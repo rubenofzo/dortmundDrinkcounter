@@ -36,7 +36,7 @@ export type AchievementContext = {
   blockWins: readonly number[];
   /** Days seen so far, by day key. */
   days: ReadonlyMap<string, DayInfo>;
-  /** Ids of the achievements this player has earned so far (re-checked until stable, so Collector sees them all). */
+  /** Ids of the achievements this player has earned so far. */
   unlockedIds: ReadonlySet<string>;
 };
 

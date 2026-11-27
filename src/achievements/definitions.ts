@@ -459,12 +459,4 @@ export const achievements: AchievementDefinition[] = [
     hidden: true,
     check: brak,
   },
-  {
-    id: "collector",
-    name: "Collector",
-    description: "Unlock 10 other achievements.",
-    icon: "🏆",
-    check: (c) => [...c.unlockedIds].filter((id) => id !== "collector").length >= 10,
-    progress: (c) => [[...c.unlockedIds].filter((id) => id !== "collector").length, 10],
-  },
 ];

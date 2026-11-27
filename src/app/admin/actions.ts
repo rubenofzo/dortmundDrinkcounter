@@ -94,7 +94,7 @@ export async function removePlayer(input: { playerId: number }): Promise<Result>
 
 const menuSchema = z.object({
   name: nameField,
-  category: z.enum(CATEGORIES, "Pick a category."),
+  category: z.enum([...CATEGORIES, "Custom"], "Pick a category."),
   icon: z.string().trim().min(1, "Pick an icon.").max(8, "Icon: one emoji."),
   ml: z.number().int("ml must be a whole number.").min(1).max(5000),
   abv: z.number().min(0, "ABV can't be negative.").max(100, "ABV is at most 100."),

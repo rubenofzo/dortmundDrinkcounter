@@ -28,7 +28,7 @@ export function AdminMenu({ items }: { items: Item[] }) {
   function form(item: Item | null) {
     const read = (fd: FormData) => ({
       name: String(fd.get("name") ?? ""),
-      category: String(fd.get("category") ?? "") as (typeof CATEGORIES)[number],
+      category: String(fd.get("category") ?? "") as (typeof CATEGORIES)[number] | "Custom",
       icon: String(fd.get("icon") ?? ""),
       ml: Number(fd.get("ml")),
       abv: Number(fd.get("abv")),
@@ -53,7 +53,7 @@ export function AdminMenu({ items }: { items: Item[] }) {
           <label className={labelClass}>
             Category
             <select name="category" defaultValue={item?.category ?? CATEGORIES[0]} className={fieldClass}>
-              {CATEGORIES.map((c) => (
+              {[...CATEGORIES, "Custom" as const].map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
