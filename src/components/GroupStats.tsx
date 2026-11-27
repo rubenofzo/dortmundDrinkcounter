@@ -1,15 +1,30 @@
 import type { Hub } from "@/lib/data";
 import { formatPoints } from "@/lib/drinks";
-import { groupStats, litreComparison } from "@/lib/stats";
-import { blockLabel, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
+import { categoryMix, groupStats, litreComparison } from "@/lib/stats";
+import { blockLabel, blockStart, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
 import { CategoryPie } from "./CategoryMix";
-import { formatSpan } from "./StatTiles";
+import { ShowMore } from "./ShowMore";
 import { CardPanel, KpiCard, PlayerDot, SectionTitle } from "./ui";
 
 /** Group fun stats for the home page: KPI cards, drinks per category pie, share per person. */
 export function GroupStats({ hub }: { hub: Hub }) {
   const g = groupStats(hub.drinks, hub.players, hub.now);
   const totalPoints = g.points || 1;
+  const thisBlock = blockStart(hub.now);
+  const blockMix = categoryMix(hub.drinks.filter((d) => blockStart(d.at) === thisBlock));
+  const foldShares = g.shares.length > 7;
+  const shareRow = (s: (typeof g.shares)[number]) => (
+                <li key={s.player.id} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-[15px]">
+                    <PlayerDot color={s.player.color} size={12} />
+                    <span className="min-w-0 flex-1 truncate font-semibold">{s.player.name}</span>
+                    <span className="text-ink-muted">{Math.round((s.points / totalPoints) * 100)}%</span>
+                  </div>
+                  <span className="h-2 overflow-hidden rounded-full bg-foam-line">
+                    <span className="block h-full" style={{ width: `${(s.points / totalPoints) * 100}%`, background: s.player.color }} />
+                  </span>
+                </li>
+  );
   return (
     <section className="flex flex-col gap-3 md:gap-5">
       <SectionTitle className="uppercase">Fun stats</SectionTitle>
@@ -49,12 +64,6 @@ export function GroupStats({ hub }: { hub: Hub }) {
           value={g.streak ? `${g.streak.value.hours} h` : "–"}
           sub={g.streak ? `${g.streak.player.name}, from ${hourLabel(g.streak.value.from)}` : undefined}
         />
-        <KpiCard
-          icon="🏜️"
-          label="Longest dry spell"
-          value={g.drySpell ? formatSpan(g.drySpell.value.ms) : "–"}
-          sub={g.drySpell ? `${g.drySpell.player.name}, from ${formatClock(g.drySpell.value.from)}` : undefined}
-        />
       </div>
 
       {g.days.length > 0 && (
@@ -74,28 +83,22 @@ export function GroupStats({ hub }: { hub: Hub }) {
 
       <div className="grid gap-3 md:grid-cols-2 md:gap-5">
         <CardPanel>
-          <h3 className="mb-2 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Drinks per category</h3>
-          <CategoryPie mix={g.mix} />
+          <h3 className="mb-2 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">This block · {blockLabel(thisBlock)}</h3>
+          <CategoryPie mix={blockMix} empty="No drinks this block yet." />
         </CardPanel>
         <CardPanel>
           <h3 className="mb-3 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Share of the group total</h3>
           {g.shares.length === 0 ? (
             <p className="text-sm text-ink-muted">No drinks yet.</p>
           ) : (
-            <ul className="flex flex-col gap-2.5">
-              {g.shares.map((s) => (
-                <li key={s.player.id} className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2 text-[15px]">
-                    <PlayerDot color={s.player.color} size={12} />
-                    <span className="min-w-0 flex-1 truncate font-semibold">{s.player.name}</span>
-                    <span className="text-ink-muted">{Math.round((s.points / totalPoints) * 100)}%</span>
-                  </div>
-                  <span className="h-2 overflow-hidden rounded-full bg-foam-line">
-                    <span className="block h-full" style={{ width: `${(s.points / totalPoints) * 100}%`, background: s.player.color }} />
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="flex flex-col gap-2.5">{(foldShares ? g.shares.slice(0, 5) : g.shares).map(shareRow)}</ul>
+              {foldShares && (
+                <ShowMore tone="card" label={`Show all ${g.shares.length}`}>
+                  <ul className="mt-2.5 flex flex-col gap-2.5">{g.shares.slice(5).map(shareRow)}</ul>
+                </ShowMore>
+              )}
+            </>
           )}
         </CardPanel>
       </div>

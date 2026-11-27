@@ -46,14 +46,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     <div className="flex flex-col gap-4 md:gap-6">
       <TripStrip now={hub.now} drinks={hub.drinks.length} points={formatPoints(totalPoints)} hourPoints={formatPoints(hourPoints)} />
       <PeopleGrid tiles={tiles} menu={menu} />
-      <ThisHourBoard hub={hub} />
+      <ThisHourBoard hub={hub} meId={me?.id} />
+      <LatestFeed hub={hub} />
       <HallPanel>
         <SectionTitle className="mb-2 uppercase">Points per 3 hours</SectionTitle>
         {chart.points.length === 0 ? <p className="text-mist">The chart starts with the first drink.</p> : <HourChart points={chart.points} series={chart.series} />}
       </HallPanel>
       <StillInSystem hub={hub} />
       <GroupStats hub={hub} />
-      <LatestFeed hub={hub} />
       {picking && <WhoAreYou players={hub.players.map((p) => ({ id: p.id, name: p.name, color: p.color }))} dismissable={!!me} />}
     </div>
   );

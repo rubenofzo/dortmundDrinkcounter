@@ -31,8 +31,8 @@ export function CategoryMixBar({ mix }: { mix: Slice[] }) {
 }
 
 /** Group pie: drinks per category. */
-export function CategoryPie({ mix, height = 220 }: { mix: Slice[]; height?: number }) {
-  if (mix.length === 0) return <p className="py-10 text-center text-sm text-ink-muted">No drinks yet.</p>;
+export function CategoryPie({ mix, height = 220, empty = "No drinks yet." }: { mix: Slice[]; height?: number; empty?: string }) {
+  if (mix.length === 0) return <p className="py-10 text-center text-sm text-ink-muted">{empty}</p>;
   return (
     <div className="flex flex-col gap-3">
       <div style={{ height }} className="w-full">

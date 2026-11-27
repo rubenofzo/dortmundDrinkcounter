@@ -18,7 +18,7 @@ export type TileData = {
   load: string;
 };
 
-/** The big tappable people tiles, the drink picker sheet and the log toast. */
+/** "Drink for me" button, the big tappable tiles for everyone else, the drink picker sheet and the log toast. */
 export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[] }) {
   const router = useRouter();
   const [target, setTarget] = useState<TileData | null>(null);
@@ -45,17 +45,39 @@ export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[
     router.refresh();
   }
 
+  const me = tiles.find((t) => t.isMe);
+  const others = tiles.filter((t) => !t.isMe);
+  const choose = (t: TileData) => {
+    setTarget(t);
+    setOpen(true);
+  };
+
   return (
     <>
+      {me && (
+        <button
+          type="button"
+          onClick={() => choose(me)}
+          className="flex min-h-16 w-full items-center gap-3 rounded-2xl bg-accent px-4 text-left text-foam shadow-[0_8px_20px_rgba(229,58,47,0.25)] transition active:scale-[0.98] active:bg-accent-dark"
+        >
+          <PlayerDot color={me.color} size={12} on="hall" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[17px] font-extrabold">Drink for me</span>
+            <span className="tabular block text-[12.5px] text-foam/85">
+              {me.name} · {me.todayPoints} pts today · {me.todayCount} 🍺
+            </span>
+          </span>
+          <span aria-hidden className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-foam text-[24px] leading-none font-bold text-accent">
+            +
+          </span>
+        </button>
+      )}
       <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3.5 lg:grid-cols-4">
-        {tiles.map((t) => (
+        {others.map((t) => (
           <li key={t.id}>
             <button
               type="button"
-              onClick={() => {
-                setTarget(t);
-                setOpen(true);
-              }}
+              onClick={() => choose(t)}
               className={`flex min-h-[88px] w-full flex-col justify-between gap-1 rounded-2xl border px-3.5 py-3 text-left transition active:scale-[0.97] active:bg-accent-dark ${
                 t.isMe ? "border-accent bg-accent/15" : "border-line bg-hall-panel"
               } hover:border-accent`}
