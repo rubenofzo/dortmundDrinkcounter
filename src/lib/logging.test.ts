@@ -24,3 +24,11 @@ describe("logDrinkSchema", () => {
     expect(logDrinkSchema.safeParse({ playerId: 1, drinkTypeId: 2, website: "spam" }).success).toBe(false);
   });
 });
+
+describe("own size for menu drinks", () => {
+  it("accepts a menu drink with an ml override, within limits", () => {
+    expect(logDrinkSchema.safeParse({ playerId: 1, drinkTypeId: 2, ml: 1000 }).success).toBe(true);
+    expect(logDrinkSchema.safeParse({ playerId: 1, drinkTypeId: 2, ml: 0 }).success).toBe(false);
+    expect(logDrinkSchema.safeParse({ playerId: 1, drinkTypeId: 2, ml: 5000 }).success).toBe(false);
+  });
+});
