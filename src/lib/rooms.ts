@@ -1,4 +1,6 @@
+import { playerColor } from "./colors";
 import type { Hub, Player, Room } from "./data";
+import { blockChartData, type ChartPoint, type ChartSeries } from "./hours";
 
 /** A room is our hotel room: at most this many people. */
 export const MAX_ROOM_SIZE = 4;
@@ -38,4 +40,26 @@ export function rankRooms(hub: Pick<Hub, "rooms" | "players" | "drinks">): RoomS
     r.rank = i > 0 && Math.abs(rows[i - 1].points - r.points) < EPS ? rows[i - 1].rank : i + 1;
   });
   return rows;
+}
+
+/**
+ * Data for `HourChart` with one line per room: each room's drinks are counted as if the room
+ * were one player, so the chart adds up the room's points per 3-hour block. Rooms without
+ * drinks are left out; colours follow room order.
+ */
+export function roomChartData(hub: Pick<Hub, "rooms" | "players" | "drinks" | "now">): { points: ChartPoint[]; series: ChartSeries[] } {
+  const roomOf = new Map(hub.players.map((p) => [p.id, p.roomId]));
+  const drinks = hub.drinks.flatMap((d) => {
+    const roomId = roomOf.get(d.playerId);
+    return roomId == null ? [] : [{ ...d, playerId: roomId }];
+  });
+  const asPlayers: Player[] = hub.rooms.map((r, i) => ({
+    id: r.id,
+    name: `${r.icon} ${r.name}`,
+    slug: "",
+    colorIndex: i,
+    color: playerColor(i),
+    roomId: r.id,
+  }));
+  return blockChartData(drinks, asPlayers, hub.now);
 }
