@@ -1,6 +1,5 @@
 "use client";
 
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { CATEGORY_ICON, type Category } from "@/lib/drinks";
 
 type Slice = { category: string; count: number };
@@ -26,28 +25,6 @@ export function CategoryMixBar({ mix }: { mix: Slice[] }) {
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-/** Group pie: drinks per category. */
-export function CategoryPie({ mix, height = 220, empty = "No drinks yet." }: { mix: Slice[]; height?: number; empty?: string }) {
-  if (mix.length === 0) return <p className="py-10 text-center text-sm text-ink-muted">{empty}</p>;
-  return (
-    <div className="flex flex-col gap-3">
-      <div style={{ height }} className="w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={mix} dataKey="count" nameKey="category" innerRadius="45%" outerRadius="85%" stroke="#fbf5e6" strokeWidth={2} isAnimationActive={false}>
-              {mix.map((m) => (
-                <Cell key={m.category} fill={COLORS[m.category] ?? COLORS.Custom} />
-              ))}
-            </Pie>
-            <Tooltip contentStyle={{ background: "#fbf5e6", border: "1px solid #e9dcbc", borderRadius: 10, color: "#17120a", fontSize: 13 }} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <CategoryMixBar mix={mix} />
     </div>
   );
 }
