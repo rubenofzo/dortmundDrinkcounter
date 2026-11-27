@@ -28,8 +28,13 @@ export function rateLimitRemaining(lastCreatedAt: number | null, now: number, li
 
 const honeypot = z.string().max(0).optional();
 
+/** Quick emoji choices for a new custom drink (any emoji can be typed too). */
+export const CUSTOM_EMOJIS = ["🧪", "🍺", "🍻", "🍷", "🍸", "🍹", "🥃", "🍶", "🍾", "🧉", "🫗", "🔥"] as const;
+
 export const customDrinkSchema = z.object({
   name: z.string().trim().min(1).max(40),
+  /** Emoji shown for the drink; up to a few characters (emoji can be several code points). */
+  icon: z.string().trim().min(1).max(16).optional(),
   ml: z.number().int().min(1).max(MAX_ML),
   abv: z.number().min(0).max(100),
 });

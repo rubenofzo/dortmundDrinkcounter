@@ -87,8 +87,27 @@ export async function logDrink(input: LogDrinkInput): Promise<LogResult> {
       // A chosen size replaces the menu size; ABV and name stay the menu's.
       item = { name: t.name, category: t.category as Category, icon: t.icon, ml: ml ?? t.ml, abv: Number(t.abv), typeId: t.id };
     } else {
+      // A custom drink is saved as a "Custom" menu item (or updates the saved one with that
+      // name), so it can be logged again in one tap. A name taken by a regular menu item is
+      // logged as-is without saving.
       const c = custom!;
-      item = { name: c.name, category: "Custom", icon: CATEGORY_ICON.Custom, ml: c.ml, abv: c.abv, typeId: null };
+      const icon = c.icon || CATEGORY_ICON.Custom;
+      const [existing] = await tx.select().from(schema.drinkTypes).where(eq(schema.drinkTypes.name, c.name));
+      let typeId: number | null = null;
+      if (existing?.category === "Custom") {
+        await tx
+          .update(schema.drinkTypes)
+          .set({ icon, ml: c.ml, abv: c.abv, hidden: false })
+          .where(eq(schema.drinkTypes.id, existing.id));
+        typeId = existing.id;
+      } else if (!existing) {
+        const [created] = await tx
+          .insert(schema.drinkTypes)
+          .values({ name: c.name, category: "Custom", icon, ml: c.ml, abv: c.abv, sortOrder: 1000 })
+          .returning({ id: schema.drinkTypes.id });
+        typeId = created.id;
+      }
+      item = { name: c.name, category: "Custom", icon, ml: c.ml, abv: c.abv, typeId };
     }
 
     const [row] = await tx
