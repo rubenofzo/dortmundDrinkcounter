@@ -127,13 +127,13 @@ their tile, their page and a group "Still in the system" ranking on the home pag
 - Model: every logged drink adds its grams of pure alcohol at `consumed_at`; the body removes
   alcohol at a steady rate until the total reaches zero (it never goes below zero and doesn't
   "bank" time before a drink). Simulate this in time order over each person's drinks.
-- Rate: **0.1 g per kg body weight per hour**. Body weight is optional (a field on the person's
-  page, kg, stored on `players.weight_kg`); without it use **7 g/hour** (about 0.7 points/hour).
+- Rate: a fixed **7 g of alcohol per hour** (about 0.7 points/hour) for everyone, as a
+  constant in `src/lib/metabolism.ts`. No body weight or other personal data.
 - Show it in grams and as points ("still processing 3.4 drinks"), plus a small sparkline/area
   chart of the curve over the last 12 hours and the person's **peak** of the weekend.
 - Recompute on every refresh so it visibly ticks down; put the pure function in
   `src/lib/metabolism.ts` with vitest tests (single drink decays to 0, overlapping drinks stack,
-  weight changes the rate, never negative).
+  never negative).
 - Fun stats from it: "Peak load" of the weekend (person and time), and who processed the most
   alcohol in total.
 - Under the number, always show a small line: "Rough estimate for fun. Not a sobriety or
@@ -178,7 +178,7 @@ with:
 
 ## Data model (Drizzle)
 
-- `players`: id, name (unique), slug, colour index, weight_kg (nullable), created_at.
+- `players`: id, name (unique), slug, colour index, created_at.
 - `drink_types`: id, name, category, icon, ml, abv (numeric), sort order, hidden.
 - `drinks`: id, player_id, drink_type_id (null for custom), name, category, ml, abv, consumed_at
   (timestamptz, defaults to now), logged_by_player_id (nullable), created_at, deleted_at
