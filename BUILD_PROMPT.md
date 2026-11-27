@@ -104,6 +104,9 @@ plus `router.refresh()`; no websockets needed).
 
 ## Fun stats
 
+Logging for someone else is just a convenience, so no stat or achievement looks at who
+logged a drink (`logged_by` is only for the feed and undo).
+
 Show these on the home page (group) and on each person's page, PokerHub-style KPI cards:
 
 - Total drinks, total points, and **pure alcohol in ml** ("you've had 312 ml of pure alcohol").
@@ -116,8 +119,7 @@ Show these on the home page (group) and on each person's page, PokerHub-style KP
 - **Biggest hour** of the weekend (person and hour) and the group's busiest hour.
 - **Liquid volume**: total litres drunk ("2.4 L, that's a big bottle of cola").
 - **Longest dry spell** during the day, between 12:00 and 02:00.
-- Group: drinks per category pie, who logs the most for other people ("Waiter of the Weekend"),
-  and the share of the group total per person.
+- Group: drinks per category pie and the share of the group total per person.
 
 ### Alcohol still in your system
 
@@ -169,7 +171,6 @@ with:
 | Century | 💯 | 100 points as a group (everyone who drank that day gets it). |
 | Steady Eddie | 🐢 | At least 1 drink in every hour from 20:00 to 01:00 on one night. |
 | Comeback Kid | 🔁 | Win an hour after 3 hours with no drinks. |
-| Waiter | 🧑‍🍳 | Log 10 drinks for other people. |
 | Liter Club | 🪣 | Drink 5 litres in total over the weekend. |
 | All-Rounder | 🎨 | A beer, a wine, a mixed drink and a shot in one day. |
 | Sticky Fingers (hidden) | 🍯 | Have a drink undone 3 times. |
