@@ -9,6 +9,7 @@ import { ThisHourBoard } from "@/components/ThisHourBoard";
 import { HallPanel, SectionTitle } from "@/components/ui";
 import { getHub } from "@/lib/data";
 import { formatPoints } from "@/lib/drinks";
+import { roomChartData } from "@/lib/rooms";
 import { blockChartData } from "@/lib/hours";
 import { getMe } from "@/lib/identity";
 import { loadAt } from "@/lib/metabolism";
@@ -39,6 +40,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   const menu = hub.drinkTypes.filter((t) => !t.hidden);
   const chart = blockChartData(hub.drinks, hub.players, hub.now);
+  const roomChart = roomChartData(hub);
   const totalPoints = hub.drinks.reduce((s, d) => s + d.points, 0);
   const hourPoints = hub.drinks.filter((d) => blockStart(d.at) === thisBlock).reduce((s, d) => s + d.points, 0);
 
@@ -53,6 +55,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         {chart.points.length === 0 ? <p className="text-mist">The chart starts with the first drink.</p> : <HourChart points={chart.points} series={chart.series} />}
       </HallPanel>
       <StillInSystem hub={hub} />
+      {roomChart.points.length > 0 && (
+        <HallPanel>
+          <SectionTitle className="mb-2 uppercase">Rooms over time</SectionTitle>
+          <HourChart points={roomChart.points} series={roomChart.series} />
+        </HallPanel>
+      )}
       <GroupStats hub={hub} />
       {picking && <WhoAreYou players={hub.players.map((p) => ({ id: p.id, name: p.name, color: p.color }))} dismissable={!!me} />}
     </div>
