@@ -6,7 +6,7 @@ import { addDrinkType, setDrinkTypeHidden, updateDrinkType, type Result } from "
 import { fieldClass, labelClass } from "@/components/DrinkEditor";
 import { CATEGORIES, CATEGORY_ICON, formatAbv, formatVolume } from "@/lib/drinks";
 
-type Item = { id: number; name: string; category: string; icon: string; ml: number; abv: number; sortOrder: number; hidden: boolean };
+type Item = { id: number; name: string; category: string; icon: string; ml: number; abv: number; sortOrder: number; hidden: boolean; custom?: boolean };
 
 /** Add, edit and hide/unhide menu items. Never changes drinks already logged. */
 export function AdminMenu({ items }: { items: Item[] }) {
@@ -55,7 +55,7 @@ export function AdminMenu({ items }: { items: Item[] }) {
             <select name="category" defaultValue={item?.category ?? CATEGORIES[0]} className={fieldClass}>
               {[...CATEGORIES, "Custom" as const].map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {c === "Custom" ? "Other" : c}
                 </option>
               ))}
             </select>
@@ -102,7 +102,7 @@ export function AdminMenu({ items }: { items: Item[] }) {
               <div className={`min-w-0 flex-1 ${it.hidden ? "opacity-50" : ""}`}>
                 <p className="truncate font-bold">{it.name}</p>
                 <p className="text-xs text-ink-muted">
-                  {it.category} · {formatVolume(it.ml)} · {formatAbv(it.abv)}
+                  {it.category === "Custom" ? "Other" : it.category}{it.custom ? " (custom)" : ""} · {formatVolume(it.ml)} · {formatAbv(it.abv)}
                   {it.hidden && " · hidden"}
                 </p>
               </div>

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { formatAbv, formatVolume, CATEGORIES } from "@/lib/drinks";
+import { formatAbv, formatVolume, CATEGORIES, CATEGORY_ICON, type Category } from "@/lib/drinks";
 import { CUSTOM_EMOJIS, CUSTOM_ML_CHIPS, MAX_ML, SIZE_ML_CHIPS } from "@/lib/logging";
 import { DialogClose } from "./ui";
 
-export type MenuItem = { id: number; name: string; category: string; icon: string; ml: number; abv: number };
-export type PickPayload = { drinkTypeId: number; ml?: number } | { custom: { name: string; icon: string; ml: number; abv: number } };
+export type MenuItem = { id: number; name: string; category: string; icon: string; ml: number; abv: number; custom: boolean };
+export type PickPayload = { drinkTypeId: number; ml?: number } | { custom: { name: string; icon: string; ml: number; abv: number; category: Category } };
 
 /**
  * Bottom sheet with the menu for one person. One tap on a drink logs it, in the menu size or,
@@ -33,6 +33,8 @@ export function DrinkPicker({
   const [icon, setIcon] = useState<string>(CUSTOM_EMOJIS[0]);
   const [ml, setMl] = useState<number>(330);
   const [abv, setAbv] = useState("5");
+  /** What the custom drink counts as for achievements; "Custom" is shown as "Other". */
+  const [kind, setKind] = useState<Category>("Custom");
   /** Own size for menu drinks; null = the menu size. */
   const [size, setSize] = useState<number | null>(null);
   const [sizeText, setSizeText] = useState("");
@@ -70,8 +72,8 @@ export function DrinkPicker({
 
   const abvNum = Number(abv.replace(",", "."));
   const customOk = Number.isFinite(abvNum) && abvNum >= 0 && abvNum <= 100 && ml > 0 && name.trim().length > 0;
-  /** Custom drinks saved earlier (category "Custom"), newest first. */
-  const saved = menu.filter((m) => m.category === "Custom").sort((a, b) => b.id - a.id);
+  /** Custom drinks saved earlier, newest first. */
+  const saved = menu.filter((m) => m.custom).sort((a, b) => b.id - a.id);
 
   return (
     <dialog
@@ -132,7 +134,7 @@ export function DrinkPicker({
           </div>
         </section>
         {CATEGORIES.map((cat) => {
-          const items = menu.filter((m) => m.category === cat);
+          const items = menu.filter((m) => m.category === cat && !m.custom);
           if (items.length === 0) return null;
           return (
             <section key={cat} className="mt-4">
@@ -185,7 +187,21 @@ export function DrinkPicker({
                 </button>
               ))}
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <h4 className="mt-3 mb-1.5 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Counts as</h4>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Counts as">
+              {KINDS.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setKind(k)}
+                  aria-pressed={kind === k}
+                  className={`min-h-12 rounded-full border px-4 font-bold ${kind === k ? "border-accent bg-accent text-foam" : "border-foam-line bg-white/70"}`}
+                >
+                  <span aria-hidden>{CATEGORY_ICON[k]}</span> {kindLabel(k)}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
               {CUSTOM_ML_CHIPS.map((c) => (
                 <button
                   key={c}
@@ -224,7 +240,7 @@ export function DrinkPicker({
               type="button"
               disabled={busy || !customOk}
               onClick={() => {
-                onPick({ custom: { name: name.trim(), icon: icon.trim() || CUSTOM_EMOJIS[0], ml, abv: abvNum } }, trap);
+                onPick({ custom: { name: name.trim(), icon: icon.trim() || CUSTOM_EMOJIS[0], ml, abv: abvNum, category: kind } }, trap);
                 setName("");
               }}
               className="mt-2 min-h-14 w-full rounded-xl bg-accent px-4 font-display text-lg text-foam uppercase disabled:opacity-50"
@@ -256,3 +272,7 @@ function lastGrapheme(text: string): string {
   const parts = Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (p) => p.segment);
   return parts.at(-1) ?? "";
 }
+
+/** Categories a custom drink can count as, in picker order. */
+const KINDS: Category[] = [...CATEGORIES, "Custom"];
+const kindLabel = (k: Category) => (k === "Custom" ? "Other" : k === "Shots" ? "Shot" : k);

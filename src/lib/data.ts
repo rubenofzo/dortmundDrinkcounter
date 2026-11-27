@@ -17,6 +17,8 @@ export type DrinkType = {
   abv: number;
   sortOrder: number;
   hidden: boolean;
+  /** Saved from the custom drink form. */
+  custom: boolean;
 };
 
 export type Drink = {

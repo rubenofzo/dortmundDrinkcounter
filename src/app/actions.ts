@@ -8,6 +8,7 @@ import { CATEGORY_ICON, formatVolume, type Category } from "@/lib/drinks";
 import { getMe, setMe } from "@/lib/identity";
 import { addMeSchema, logDrinkSchema, rateLimitRemaining, type LogDrinkInput, type LogResult } from "@/lib/logging";
 import { cleanName, normalizeName, slugify } from "@/lib/names";
+import { recategorise } from "@/lib/recategorise";
 
 type Simple = { ok: true } | { ok: false; error: string };
 
@@ -87,27 +88,28 @@ export async function logDrink(input: LogDrinkInput): Promise<LogResult> {
       // A chosen size replaces the menu size; ABV and name stay the menu's.
       item = { name: t.name, category: t.category as Category, icon: t.icon, ml: ml ?? t.ml, abv: Number(t.abv), typeId: t.id };
     } else {
-      // A custom drink is saved as a "Custom" menu item (or updates the saved one with that
-      // name), so it can be logged again in one tap. A name taken by a regular menu item is
-      // logged as-is without saving.
+      // A custom drink is saved as a custom menu item with its category (or updates the saved
+      // one with that name), so it can be logged again in one tap. A name taken by a regular
+      // menu item is logged as-is without saving.
       const c = custom!;
       const icon = c.icon || CATEGORY_ICON.Custom;
       const [existing] = await tx.select().from(schema.drinkTypes).where(eq(schema.drinkTypes.name, c.name));
       let typeId: number | null = null;
-      if (existing?.category === "Custom") {
+      if (existing?.custom) {
         await tx
           .update(schema.drinkTypes)
-          .set({ icon, ml: c.ml, abv: c.abv, hidden: false })
+          .set({ icon, ml: c.ml, abv: c.abv, category: c.category, hidden: false })
           .where(eq(schema.drinkTypes.id, existing.id));
+        await recategorise(tx, existing.id, c.category);
         typeId = existing.id;
       } else if (!existing) {
         const [created] = await tx
           .insert(schema.drinkTypes)
-          .values({ name: c.name, category: "Custom", icon, ml: c.ml, abv: c.abv, sortOrder: 1000 })
+          .values({ name: c.name, category: c.category, icon, ml: c.ml, abv: c.abv, sortOrder: 1000, custom: true })
           .returning({ id: schema.drinkTypes.id });
         typeId = created.id;
       }
-      item = { name: c.name, category: "Custom", icon, ml: c.ml, abv: c.abv, typeId };
+      item = { name: c.name, category: c.category, icon, ml: c.ml, abv: c.abv, typeId };
     }
 
     const [row] = await tx
