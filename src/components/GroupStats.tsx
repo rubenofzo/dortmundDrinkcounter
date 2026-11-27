@@ -3,7 +3,6 @@ import { formatPoints } from "@/lib/drinks";
 import { groupStats, litreComparison } from "@/lib/stats";
 import { blockLabel, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
 import { CategoryPie } from "./CategoryMix";
-import { formatSpan } from "./StatTiles";
 import { ShowMore } from "./ShowMore";
 import { CardPanel, KpiCard, PlayerDot, SectionTitle } from "./ui";
 
@@ -62,12 +61,6 @@ export function GroupStats({ hub }: { hub: Hub }) {
           label="Longest streak"
           value={g.streak ? `${g.streak.value.hours} h` : "–"}
           sub={g.streak ? `${g.streak.player.name}, from ${hourLabel(g.streak.value.from)}` : undefined}
-        />
-        <KpiCard
-          icon="🏜️"
-          label="Longest dry spell"
-          value={g.drySpell ? formatSpan(g.drySpell.value.ms) : "–"}
-          sub={g.drySpell ? `${g.drySpell.player.name}, from ${formatClock(g.drySpell.value.from)}` : undefined}
         />
       </div>
 
