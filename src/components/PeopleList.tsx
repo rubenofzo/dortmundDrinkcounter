@@ -16,15 +16,15 @@ export function PeopleList({ hub }: { hub: Hub }) {
     <ul className="flex flex-col divide-y divide-line overflow-hidden rounded-2xl border border-line bg-hall-panel md:grid md:grid-cols-2 md:gap-4 md:divide-y-0 md:overflow-visible md:border-0 md:bg-transparent lg:grid-cols-3">
       {rows.map(({ p, drinks, points, load }) => (
         <li key={p.id} className="md:overflow-hidden md:rounded-[20px] md:bg-foam md:text-ink md:shadow-[0_10px_24px_rgba(0,0,0,0.35)]">
-          <Link href={`/people/${p.slug}`} className="flex min-h-[64px] items-center gap-3 px-3.5 py-2.5 text-foam no-underline md:min-h-[96px] md:px-6 md:text-ink">
-            <PlayerDot color={p.color} size={16} on="hall" className="md:ring-ink/40" />
+          <Link href={`/people/${p.slug}`} className="flex min-h-14 items-center gap-3 px-3.5 py-2 text-foam no-underline md:min-h-[96px] md:px-6 md:text-ink">
+            <PlayerDot color={p.color} size={12} on="hall" className="md:ring-ink/40" />
             <div className="min-w-0 flex-1">
-              <div className="truncate font-display text-[22px] leading-tight uppercase">{p.name}</div>
-              <div className="text-[13px] text-mist md:text-ink-muted">
+              <div className="truncate text-[17px] leading-tight font-bold md:font-display md:text-[22px] md:font-normal md:uppercase">{p.name}</div>
+              <div className="text-[12.5px] text-mist md:text-ink-muted">
                 {drinks} {drinks === 1 ? "drink" : "drinks"} · {Math.round(load)} g in the system
               </div>
             </div>
-            <span className="font-display text-[26px] leading-none">{formatPoints(points)}</span>
+            <span className="tabular font-display text-[22px] leading-none md:text-[26px]">{formatPoints(points)}</span>
             <Chevron className="text-mist md:hidden" />
           </Link>
         </li>
