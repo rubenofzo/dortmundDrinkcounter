@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { TIER_LABEL } from "@/achievements/rarity";
+import { TIER_LABEL, TIER_RANK } from "@/achievements/rarity";
 import { formatPercent } from "@/lib/achievementViews";
 import { AchievementDetailProvider, AchievementDetailTrigger, type AchievementView } from "./AchievementDetail";
 import { AchievementRow } from "./AchievementRow";
@@ -15,9 +15,9 @@ function sortItems(items: AchievementView[], sort: Sort): AchievementView[] {
   return [...items].sort((a, b) => {
     switch (sort) {
       case "rarest":
-        return a.rarity - b.rarity || a.name.localeCompare(b.name);
+        return TIER_RANK[b.tier] - TIER_RANK[a.tier] || a.rarity - b.rarity || a.name.localeCompare(b.name);
       case "common":
-        return b.rarity - a.rarity || a.name.localeCompare(b.name);
+        return TIER_RANK[a.tier] - TIER_RANK[b.tier] || b.rarity - a.rarity || a.name.localeCompare(b.name);
       case "recent":
         return (b.unlockedOrder ?? -1) - (a.unlockedOrder ?? -1) || a.name.localeCompare(b.name);
       case "name":

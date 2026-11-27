@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { useState } from "react";
+import { TIER_RANK } from "@/achievements/rarity";
 import { AchievementDetailProvider, type AchievementView } from "./AchievementDetail";
 import { AchievementRow } from "./AchievementRow";
 import { CardPanel } from "./ui";
@@ -23,7 +24,7 @@ export function AchievementList({ achievements, playerCount }: { achievements: A
   const listed = achievements
     .filter((a) => (filter === "all" ? true : filter === "unlocked" ? !a.locked : a.locked))
     // Ties break on the displayed name; hidden ones arrive as "???" (see `redact` in views.ts).
-    .sort((a, b) => (sort === "rarest" ? a.rarity - b.rarity : b.rarity - a.rarity) || a.name.localeCompare(b.name));
+    .sort((a, b) => (sort === "rarest" ? byHardest(a, b) : -byHardest(a, b)) || a.name.localeCompare(b.name));
 
   return (
     <AchievementDetailProvider achievements={achievements}>
@@ -80,4 +81,9 @@ export function AchievementList({ achievements, playerCount }: { achievements: A
       </div>
     </AchievementDetailProvider>
   );
+}
+
+/** Hardest tier first; within a tier, the fewest players first. */
+function byHardest(a: AchievementView, b: AchievementView): number {
+  return TIER_RANK[b.tier] - TIER_RANK[a.tier] || a.rarity - b.rarity;
 }

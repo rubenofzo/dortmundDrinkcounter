@@ -108,6 +108,14 @@ describe("achievement engine", () => {
     expect(get("completionist", 1)).toBeUndefined();
   });
 
+  it("uses each achievement's fixed tier, not how many people have it", () => {
+    const { r } = run([drink(1, fri(20)), drink(2, fri(20, 30))], fri(21));
+    const first = r.summaries.find((s) => s.definition.id === "first-round")!;
+    expect(first.rarity).toBe(1);
+    expect(first.tier).toBe("common");
+    expect(r.summaries.find((s) => s.definition.id === "completionist")!.tier).toBe("ultra");
+  });
+
   it("never looks at who logged the drink", () => {
     const a = run([drink(1, fri(20))], fri(21));
     const b = run([{ ...drink(1, fri(20)), loggedByPlayerId: 2 }], fri(21));

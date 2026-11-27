@@ -19,7 +19,7 @@ export default async function AchievementsPage() {
         <PageTitle className="uppercase">Achievements</PageTitle>
         <p className="text-[12.5px] text-mist md:text-base">
           <span className="md:hidden">
-            {unlocked} of {views.length} unlocked · rarity is the share of the {drinkers} drinkers
+            {unlocked} of {views.length} unlocked · % is the share of the {drinkers} drinkers who have it
           </span>
           <span className="hidden md:inline">
             Rarity is the share of the {drinkers} drinkers who have earned it.
