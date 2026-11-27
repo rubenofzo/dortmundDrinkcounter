@@ -38,7 +38,7 @@ export default async function PersonPage({ params }: Props) {
       <StatTiles s={stats} />
       <PlayerAchievements playerId={player.id} />
       <HallPanel className="flex flex-col gap-3">
-        <SectionTitle className="uppercase">Points per 3 hours</SectionTitle>
+        <SectionTitle className="uppercase">Points over time</SectionTitle>
         <HourChart points={chart.points} series={chart.series} />
       </HallPanel>
       <section className="flex flex-col gap-3">
