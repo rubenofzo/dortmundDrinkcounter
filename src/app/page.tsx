@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PeopleGrid, type TileData } from "@/components/PeopleGrid";
 import { LatestFeed } from "@/components/LatestFeed";
 import { StillInSystem } from "@/components/StillInSystem";
@@ -55,12 +56,20 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         {chart.points.length === 0 ? <p className="text-mist">The chart starts with the first drink.</p> : <HourChart points={chart.points} series={chart.series} />}
       </HallPanel>
       <StillInSystem hub={hub} />
-      {roomChart.points.length > 0 && (
-        <HallPanel>
-          <SectionTitle className="mb-2 uppercase">Rooms over time</SectionTitle>
+      <HallPanel>
+        <SectionTitle className="mb-2 uppercase">Rooms over time</SectionTitle>
+        {roomChart.points.length > 0 ? (
           <HourChart points={roomChart.points} series={roomChart.series} />
-        </HallPanel>
-      )}
+        ) : (
+          <p className="text-mist">
+            Make rooms and put people in them on the{" "}
+            <Link href="/people" className="font-bold text-accent-light">
+              People
+            </Link>{" "}
+            page to race room against room.
+          </p>
+        )}
+      </HallPanel>
       <GroupStats hub={hub} />
       {picking && <WhoAreYou players={hub.players.map((p) => ({ id: p.id, name: p.name, color: p.color }))} dismissable={!!me} />}
     </div>
