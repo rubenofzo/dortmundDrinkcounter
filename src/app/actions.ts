@@ -58,7 +58,7 @@ export async function addMe(name: string): Promise<Simple> {
 export async function logDrink(input: LogDrinkInput): Promise<LogResult> {
   const parsed = logDrinkSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Couldn't read that drink, try again" };
-  const { playerId, drinkTypeId, custom } = parsed.data;
+  const { playerId, drinkTypeId, custom, ml } = parsed.data;
 
   const hub = await getHub();
   const me = await getMe(hub);
@@ -84,7 +84,8 @@ export async function logDrink(input: LogDrinkInput): Promise<LogResult> {
     if (drinkTypeId !== undefined) {
       const [t] = await tx.select().from(schema.drinkTypes).where(eq(schema.drinkTypes.id, drinkTypeId));
       if (!t || t.hidden) return { ok: false, error: "That drink isn't on the menu" };
-      item = { name: t.name, category: t.category as Category, icon: t.icon, ml: t.ml, abv: Number(t.abv), typeId: t.id };
+      // A chosen size replaces the menu size; ABV and name stay the menu's.
+      item = { name: t.name, category: t.category as Category, icon: t.icon, ml: ml ?? t.ml, abv: Number(t.abv), typeId: t.id };
     } else {
       const c = custom!;
       item = { name: c.name, category: "Custom", icon: CATEGORY_ICON.Custom, ml: c.ml, abv: c.abv, typeId: null };

@@ -9,6 +9,12 @@ export const RATE_LIMIT_MS = 10_000;
 /** Volume chips offered for custom drinks. */
 export const CUSTOM_ML_CHIPS = [20, 40, 200, 330, 500] as const;
 
+/** Size chips for logging a menu drink in another size (a pitcher, a big glass, ...). */
+export const SIZE_ML_CHIPS = [200, 250, 330, 400, 500, 1000] as const;
+
+/** Largest volume one log may have (a 2 L pitcher plus some). */
+export const MAX_ML = 3000;
+
 /** True while a drink logged at `createdAt` can still be undone by anyone. */
 export function canUndo(createdAt: number, now: number, windowMs = UNDO_MS): boolean {
   return now - createdAt < windowMs;
@@ -24,7 +30,7 @@ const honeypot = z.string().max(0).optional();
 
 export const customDrinkSchema = z.object({
   name: z.string().trim().min(1).max(40),
-  ml: z.number().int().min(1).max(2000),
+  ml: z.number().int().min(1).max(MAX_ML),
   abv: z.number().min(0).max(100),
 });
 
@@ -33,6 +39,8 @@ export const logDrinkSchema = z
     playerId: z.number().int().positive(),
     drinkTypeId: z.number().int().positive().optional(),
     custom: customDrinkSchema.optional(),
+    /** Own size in ml for a menu drink (ignored for custom drinks, which carry their own). */
+    ml: z.number().int().min(1).max(MAX_ML).optional(),
     /** Honeypot: real users never fill this in. */
     website: honeypot,
   })
