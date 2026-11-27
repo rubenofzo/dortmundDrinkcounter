@@ -26,7 +26,6 @@ function maxPerBucket(ctx: AchievementContext, test: (d: Drink) => boolean, buck
   return best;
 }
 
-const isHalbe = (d: Drink) => /pils/i.test(d.name) && /halbe/i.test(d.name);
 const isCustom = (d: Drink) => d.category === "Custom" || d.drinkTypeId === null;
 
 /** Longest run of consecutive hour buckets (in ms) in a sorted list of distinct hour starts. */
@@ -78,7 +77,6 @@ function winRun(wins: readonly number[]): number {
 
 const hourOf = (d: Drink) => berlinParts(d.at).hour;
 const totalMl = (c: AchievementContext) => c.mine.reduce((s, d) => s + d.ml, 0);
-const isSmallPils = (d: Drink) => /pils/i.test(d.name) && /small/i.test(d.name);
 const isJaeger = (d: Drink) => /j[äa]ger/i.test(d.name);
 const isSekt = (d: Drink) => /sekt|prosecco/i.test(d.name);
 const isWeizen = (d: Drink) => /weizen/i.test(d.name);
@@ -159,22 +157,6 @@ export const achievements: AchievementDefinition[] = [
     progress: (c) => [winRun(c.blockWins), 3],
   },
   {
-    id: "halbe-hero",
-    name: "Halbe Hero",
-    description: "5 Pils Halbe in total.",
-    icon: "🥨",
-    check: (c) => count(c, isHalbe) >= 5,
-    progress: (c) => [count(c, isHalbe), 5],
-  },
-  {
-    id: "dortmund-local",
-    name: "Dortmund Local",
-    description: "10 beers in total.",
-    icon: "🟡",
-    check: (c) => count(c, (d) => d.category === "Beer") >= 10,
-    progress: (c) => [count(c, (d) => d.category === "Beer"), 10],
-  },
-  {
     id: "shot-caller",
     name: "Shot Caller",
     description: "3 shots in one block.",
@@ -189,26 +171,6 @@ export const achievements: AchievementDefinition[] = [
     icon: "🍷",
     check: (c) => maxPerBucket(c, (d) => d.category === "Wine", (d) => dayKey(d.at)) >= 4,
     progress: (c) => [maxPerBucket(c, (d) => d.category === "Wine", (d) => dayKey(d.at)), 4],
-  },
-  {
-    id: "spritz-oclock",
-    name: "Spritz o'Clock",
-    description: "Drink an Aperol Spritz before 17:00.",
-    icon: "🍊",
-    // Daytime only: the day starts at 06:00, so a 03:00 spritz doesn't count as "before 17:00".
-    check: (c) =>
-      c.mine.some((d) => {
-        const h = berlinParts(d.at).hour;
-        return /aperol/i.test(d.name) && h >= 6 && h < 17;
-      }),
-  },
-  {
-    id: "connoisseur",
-    name: "Connoisseur",
-    description: "Try 6 different drinks from the menu.",
-    icon: "🧐",
-    check: (c) => new Set(c.mine.filter((d) => d.drinkTypeId !== null).map((d) => d.drinkTypeId)).size >= 6,
-    progress: (c) => [new Set(c.mine.filter((d) => d.drinkTypeId !== null).map((d) => d.drinkTypeId)).size, 6],
   },
   {
     id: "mad-scientist",
@@ -288,14 +250,6 @@ export const achievements: AchievementDefinition[] = [
       }),
   },
   {
-    id: "liter-club",
-    name: "Liter Club",
-    description: "Drink 5 litres in total over the weekend.",
-    icon: "🪣",
-    check: (c) => c.mine.reduce((s, d) => s + d.ml, 0) >= 5000,
-    progress: (c) => [Math.round(c.mine.reduce((s, d) => s + d.ml, 0) / 100) / 10, 5],
-  },
-  {
     id: "all-rounder",
     name: "All-Rounder",
     description: "A beer, a wine, a mixed drink and a shot in one day.",
@@ -359,14 +313,6 @@ export const achievements: AchievementDefinition[] = [
     icon: "🤴",
     check: (c) => count(c, (d) => d.category === "Beer") >= 20,
     progress: (c) => [count(c, (d) => d.category === "Beer"), 20],
-  },
-  {
-    id: "student-budget",
-    name: "Student Budget",
-    description: "10 small Pils in total.",
-    icon: "💸",
-    check: (c) => count(c, isSmallPils) >= 10,
-    progress: (c) => [count(c, isSmallPils), 10],
   },
   {
     id: "jager-squad",
