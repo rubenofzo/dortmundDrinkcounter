@@ -84,6 +84,43 @@ const isGluhwein = (d: Drink) => /gl(ü|u|ue)hwein/i.test(d.name);
 /** Most Glühweins this player had in one day (06:00 to 06:00). */
 const gluhweinPerDay = (c: AchievementContext) => maxPerBucket(c, isGluhwein, (d) => dayKey(d.at));
 
+/** Same drink: same menu item, or the same name for custom drinks. */
+const sameDrink = (a: Drink, b: Drink) =>
+  a.drinkTypeId !== null && b.drinkTypeId !== null ? a.drinkTypeId === b.drinkTypeId : a.name.toLowerCase() === b.name.toLowerCase();
+
+/** Longest run of the same drink in a row in this player's log. */
+function sameInARow(c: AchievementContext): number {
+  let best = 0;
+  let run = 0;
+  c.mine.forEach((d, i) => {
+    run = i > 0 && sameDrink(c.mine[i - 1], d) ? run + 1 : 1;
+    best = Math.max(best, run);
+  });
+  return best;
+}
+
+const BRAK_DRINKS = 10;
+const BRAK_BLOCKS = 3;
+
+/**
+ * Brak: at least 10 drinks in 3 consecutive blocks, followed by 3 whole blocks without a drink
+ * (all of them over by the moment being evaluated).
+ */
+function brak(c: AchievementContext): boolean {
+  const starts = [...new Set(c.mine.map((d) => blockStart(d.at)))];
+  return starts.some((first) => {
+    const busy: number[] = [first];
+    while (busy.length < BRAK_BLOCKS) busy.push(blockEnd(busy.at(-1)!));
+    const quietFrom = blockEnd(busy.at(-1)!);
+    let quietTo = quietFrom;
+    for (let i = 0; i < BRAK_BLOCKS; i++) quietTo = blockEnd(quietTo);
+    if (quietTo > c.at) return false;
+    const inBusy = c.mine.filter((d) => d.at >= first && d.at < quietFrom).length;
+    const inQuiet = c.mine.some((d) => d.at >= quietFrom && d.at < quietTo);
+    return inBusy >= BRAK_DRINKS && !inQuiet;
+  });
+}
+
 /** Most distinct 3-hour blocks with a Glühwein in any one day. */
 function marketCrawl(c: AchievementContext): number {
   const blocks = new Map<string, Set<number>>();
@@ -261,14 +298,6 @@ export const achievements: AchievementDefinition[] = [
     ],
   },
   {
-    id: "sticky-fingers",
-    name: "Sticky Fingers",
-    description: "Have a drink undone 3 times.",
-    icon: "🍯",
-    hidden: true,
-    check: (c) => c.deletedCount >= 3,
-  },
-  {
     id: "weekend-warrior",
     name: "Weekend Warrior",
     description: "Drink on all three days of the trip.",
@@ -412,6 +441,42 @@ export const achievements: AchievementDefinition[] = [
       const days = new Set(c.mine.filter(isGluhwein).map((d) => dayKey(d.at)));
       return [TRIP_DAYS.filter((k) => days.has(k)).length, TRIP_DAYS.length];
     },
+  },
+  // Hidden: ??? until someone earns them.
+  {
+    id: "twins",
+    name: "Twins",
+    description: "You and someone else log the same drink within 1 minute.",
+    icon: "👯",
+    hidden: true,
+    check: (c) => c.mine.some((m) => c.drinks.some((d) => d.playerId !== m.playerId && sameDrink(d, m) && Math.abs(d.at - m.at) <= MINUTE_MS)),
+  },
+  {
+    id: "deja-vu",
+    name: "Déjà Vu",
+    description: "The same drink 5 times in a row.",
+    icon: "🔂",
+    hidden: true,
+    check: (c) => sameInARow(c) >= 5,
+  },
+  {
+    id: "midnight-toast",
+    name: "Midnight Toast",
+    description: "A drink between 00:00 and 00:02.",
+    icon: "🕛",
+    hidden: true,
+    check: (c) => c.mine.some((d) => {
+      const p = berlinParts(d.at);
+      return p.hour === 0 && p.minute <= 2;
+    }),
+  },
+  {
+    id: "brak",
+    name: "Brak",
+    description: "10 drinks in 3 blocks in a row, then 3 blocks without a single drink.",
+    icon: "🤮",
+    hidden: true,
+    check: brak,
   },
   {
     id: "collector",

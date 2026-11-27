@@ -93,7 +93,7 @@ export const getHub = cache(async () => {
     drinkTypes,
     /** Active drinks, oldest first. */
     drinks: all.filter((d) => d.deletedAt === null),
-    /** Undone or deleted drinks (for Sticky Fingers). */
+    /** Undone or deleted drinks (kept for the record, left out of every stat). */
     deletedDrinks: all.filter((d) => d.deletedAt !== null),
     /** Request time, so server-rendered clocks and countdowns match the client. */
     now: Date.now(),
