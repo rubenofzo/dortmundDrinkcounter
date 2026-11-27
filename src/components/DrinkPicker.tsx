@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { formatAbv, formatVolume, CATEGORIES, CATEGORY_ICON, type Category } from "@/lib/drinks";
+import { formatAbv, formatVolume, CATEGORIES, COUNTS_AS, type Category, type DrinkKind } from "@/lib/drinks";
 import { CUSTOM_EMOJIS, CUSTOM_ML_CHIPS, MAX_ML, SIZE_ML_CHIPS } from "@/lib/logging";
 import { DialogClose } from "./ui";
 
 export type MenuItem = { id: number; name: string; category: string; icon: string; ml: number; abv: number; custom: boolean };
-export type PickPayload = { drinkTypeId: number; ml?: number } | { custom: { name: string; icon: string; ml: number; abv: number; category: Category } };
+export type PickPayload = { drinkTypeId: number; ml?: number } | { custom: { name: string; icon: string; ml: number; abv: number; category: Category; kind: DrinkKind | null } };
 
 /**
  * Bottom sheet with the menu for one person. One tap on a drink logs it, in the menu size or,
@@ -33,8 +33,8 @@ export function DrinkPicker({
   const [icon, setIcon] = useState<string>(CUSTOM_EMOJIS[0]);
   const [ml, setMl] = useState<number>(330);
   const [abv, setAbv] = useState("5");
-  /** What the custom drink counts as for achievements; "Custom" is shown as "Other". */
-  const [kind, setKind] = useState<Category>("Custom");
+  /** What the custom drink counts as for achievements (index into `COUNTS_AS`, default "Other"). */
+  const [countsAs, setCountsAs] = useState(COUNTS_AS.length - 1);
   /** Own size for menu drinks; null = the menu size. */
   const [size, setSize] = useState<number | null>(null);
   const [sizeText, setSizeText] = useState("");
@@ -189,15 +189,15 @@ export function DrinkPicker({
             </div>
             <h4 className="mt-3 mb-1.5 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Counts as</h4>
             <div className="flex flex-wrap gap-2" role="group" aria-label="Counts as">
-              {KINDS.map((k) => (
+              {COUNTS_AS.map((c, i) => (
                 <button
-                  key={k}
+                  key={c.label}
                   type="button"
-                  onClick={() => setKind(k)}
-                  aria-pressed={kind === k}
-                  className={`min-h-12 rounded-full border px-4 font-bold ${kind === k ? "border-accent bg-accent text-foam" : "border-foam-line bg-white/70"}`}
+                  onClick={() => setCountsAs(i)}
+                  aria-pressed={countsAs === i}
+                  className={`min-h-12 rounded-full border px-4 font-bold ${countsAs === i ? "border-accent bg-accent text-foam" : "border-foam-line bg-white/70"}`}
                 >
-                  <span aria-hidden>{CATEGORY_ICON[k]}</span> {kindLabel(k)}
+                  <span aria-hidden>{c.icon}</span> {c.label}
                 </button>
               ))}
             </div>
@@ -240,7 +240,7 @@ export function DrinkPicker({
               type="button"
               disabled={busy || !customOk}
               onClick={() => {
-                onPick({ custom: { name: name.trim(), icon: icon.trim() || CUSTOM_EMOJIS[0], ml, abv: abvNum, category: kind } }, trap);
+                onPick({ custom: { name: name.trim(), icon: icon.trim() || CUSTOM_EMOJIS[0], ml, abv: abvNum, category: COUNTS_AS[countsAs].category, kind: COUNTS_AS[countsAs].kind } }, trap);
                 setName("");
               }}
               className="mt-2 min-h-14 w-full rounded-xl bg-accent px-4 font-display text-lg text-foam uppercase disabled:opacity-50"
@@ -272,7 +272,3 @@ function lastGrapheme(text: string): string {
   const parts = Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text), (p) => p.segment);
   return parts.at(-1) ?? "";
 }
-
-/** Categories a custom drink can count as, in picker order. */
-const KINDS: Category[] = [...CATEGORIES, "Custom"];
-const kindLabel = (k: Category) => (k === "Custom" ? "Other" : k === "Shots" ? "Shot" : k);

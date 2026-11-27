@@ -19,7 +19,7 @@ let nextId = 1;
 function drink(
   playerId: number,
   at: number,
-  o: Partial<Pick<Drink, "name" | "category" | "ml" | "abv" | "drinkTypeId">> = {},
+  o: Partial<Pick<Drink, "name" | "category" | "ml" | "abv" | "drinkTypeId" | "kind">> = {},
 ): Drink {
   const ml = o.ml ?? 500;
   const abv = o.abv ?? 4.8;
@@ -29,6 +29,7 @@ function drink(
     drinkTypeId: o.drinkTypeId === undefined ? 1 : o.drinkTypeId,
     name: o.name ?? "Pils (Halbe)",
     category: o.category ?? "Beer",
+    kind: o.kind ?? null,
     icon: "🍺",
     ml,
     abv,
@@ -114,6 +115,19 @@ describe("achievement engine", () => {
     expect(first.rarity).toBe(1);
     expect(first.tier).toBe("common");
     expect(r.summaries.find((s) => s.definition.id === "completionist")!.tier).toBe("ultra");
+  });
+
+  it("counts a custom drink marked as Glühwein, Jäger or Weizen like the real thing", () => {
+    const custom = { drinkTypeId: 99, category: "Wine" as const, name: "Mum's Punch", kind: "gluhwein" as const };
+    const { get } = run([drink(1, fri(16), custom), drink(2, fri(16), { ...custom, kind: null })], fri(17));
+    expect(get("christkindl", 1)).toBeDefined();
+    expect(get("christkindl", 2)).toBeUndefined();
+    const shots = Array.from({ length: 5 }, (_, i) =>
+      drink(1, fri(20) + i * 60_000, { drinkTypeId: 98, category: "Shots", name: "Kräuter", ml: 20, abv: 35, kind: "jager" }),
+    );
+    expect(run(shots, fri(21)).get("jager-squad", 1)).toBeDefined();
+    const wheat = drink(1, fri(9), { drinkTypeId: 97, name: "Hefe", kind: "weizen" });
+    expect(run([wheat], fri(13)).get("weisswurst-breakfast", 1)).toBeDefined();
   });
 
   it("never looks at who logged the drink", () => {

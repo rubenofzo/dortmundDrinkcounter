@@ -98,14 +98,14 @@ export async function logDrink(input: LogDrinkInput): Promise<LogResult> {
       if (existing?.custom) {
         await tx
           .update(schema.drinkTypes)
-          .set({ icon, ml: c.ml, abv: c.abv, category: c.category, hidden: false })
+          .set({ icon, ml: c.ml, abv: c.abv, category: c.category, kind: c.kind, hidden: false })
           .where(eq(schema.drinkTypes.id, existing.id));
         await recategorise(tx, existing.id, c.category);
         typeId = existing.id;
       } else if (!existing) {
         const [created] = await tx
           .insert(schema.drinkTypes)
-          .values({ name: c.name, category: c.category, icon, ml: c.ml, abv: c.abv, sortOrder: 1000, custom: true })
+          .values({ name: c.name, category: c.category, icon, ml: c.ml, abv: c.abv, sortOrder: 1000, custom: true, kind: c.kind })
           .returning({ id: schema.drinkTypes.id });
         typeId = created.id;
       }

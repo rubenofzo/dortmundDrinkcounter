@@ -76,10 +76,10 @@ function winRun(wins: readonly number[]): number {
 
 const hourOf = (d: Drink) => berlinParts(d.at).hour;
 const totalMl = (c: AchievementContext) => c.mine.reduce((s, d) => s + d.ml, 0);
-const isJaeger = (d: Drink) => /j[äa]ger/i.test(d.name);
+const isJaeger = (d: Drink) => d.kind === "jager" || /j[äa]ger/i.test(d.name);
 const isSekt = (d: Drink) => /sekt|prosecco/i.test(d.name);
-const isWeizen = (d: Drink) => /weizen/i.test(d.name);
-const isGluhwein = (d: Drink) => /gl(ü|u|ue)hwein/i.test(d.name);
+const isWeizen = (d: Drink) => d.kind === "weizen" || /weizen/i.test(d.name);
+const isGluhwein = (d: Drink) => d.kind === "gluhwein" || /gl(ü|u|ue)hwein/i.test(d.name);
 /** Most Glühweins this player had in one day (06:00 to 06:00). */
 const gluhweinPerDay = (c: AchievementContext) => maxPerBucket(c, isGluhwein, (d) => dayKey(d.at));
 

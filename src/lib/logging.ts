@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES } from "./drinks";
+import { CATEGORIES, DRINK_KINDS } from "./drinks";
 
 /** Undo window (re-exported as `UNDO_WINDOW_MS` from data.ts; this file is shared with the client). */
 export const UNDO_MS = 2 * 60_000;
@@ -40,6 +40,8 @@ export const customDrinkSchema = z.object({
   abv: z.number().min(0).max(100),
   /** Counts for achievements like a menu drink of that category; "Custom" is shown as "Other". */
   category: z.enum([...CATEGORIES, "Custom"]).default("Custom"),
+  /** Weizen, Glühwein or Jäger, for the achievements that look for them. */
+  kind: z.enum(DRINK_KINDS).nullable().default(null),
 });
 
 export const logDrinkSchema = z

@@ -1,0 +1,1 @@
+ALTER TABLE "drink_types" ADD COLUMN "kind" text;

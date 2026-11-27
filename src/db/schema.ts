@@ -22,6 +22,8 @@ export const drinkTypes = pgTable("drink_types", {
   hidden: boolean("hidden").notNull().default(false),
   /** Saved from the custom drink form: shown under "Custom drinks" in the picker, whatever its category. */
   custom: boolean("custom").notNull().default(false),
+  /** Custom drinks only: "weizen" | "gluhwein" | "jager" (see `DRINK_KINDS`), for the achievements that look for them. */
+  kind: text("kind"),
 });
 
 export const drinks = pgTable(
