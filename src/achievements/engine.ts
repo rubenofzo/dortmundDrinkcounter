@@ -62,10 +62,23 @@ export function dayEndMs(key: string): number {
  * day (so group and block-based achievements settle at the right time), plus `now`. At each
  * moment every player who has drunk is checked, repeating until nothing new unlocks.
  */
+/** Results per hub object: the layout (unlock toasts) and the page share one replay per request. */
+const resultCache = new WeakMap<EngineInput, AchievementResults>();
+
 export function evaluateAchievements(
   hub: EngineInput,
   definitions: AchievementDefinition[] = defaultDefinitions,
 ): AchievementResults {
+  if (definitions !== defaultDefinitions) return replay(hub, definitions);
+  let result = resultCache.get(hub);
+  if (!result) {
+    result = replay(hub, definitions);
+    resultCache.set(hub, result);
+  }
+  return result;
+}
+
+function replay(hub: EngineInput, definitions: AchievementDefinition[]): AchievementResults {
   const sorted = [...hub.drinks].sort((a, b) => a.at - b.at || a.id - b.id);
   const deleted = [...hub.deletedDrinks]
     .filter((d) => d.deletedAt !== null)
