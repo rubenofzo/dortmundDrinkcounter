@@ -82,6 +82,21 @@ const isSmallPils = (d: Drink) => /pils/i.test(d.name) && /small/i.test(d.name);
 const isJaeger = (d: Drink) => /j[äa]ger/i.test(d.name);
 const isSekt = (d: Drink) => /sekt|prosecco/i.test(d.name);
 const isWeizen = (d: Drink) => /weizen/i.test(d.name);
+const isGluhwein = (d: Drink) => /gl(ü|u|ue)hwein/i.test(d.name);
+/** Most Glühweins this player had in one day (06:00 to 06:00). */
+const gluhweinPerDay = (c: AchievementContext) => maxPerBucket(c, isGluhwein, (d) => dayKey(d.at));
+
+/** Most distinct 3-hour blocks with a Glühwein in any one day. */
+function marketCrawl(c: AchievementContext): number {
+  const blocks = new Map<string, Set<number>>();
+  for (const d of c.mine) {
+    if (!isGluhwein(d)) continue;
+    const key = dayKey(d.at);
+    if (!blocks.has(key)) blocks.set(key, new Set());
+    blocks.get(key)!.add(blockStart(d.at));
+  }
+  return Math.max(0, ...[...blocks.values()].map((b) => b.size));
+}
 
 /** Most distinct "night shift" hours (22, 23, 0, 1, 2, 3) in any one day. */
 const NIGHT_HOURS = [22, 23, 0, 1, 2, 3];
@@ -325,7 +340,7 @@ export const achievements: AchievementDefinition[] = [
     id: "half-century",
     name: "Half Century",
     description: "50 drinks in total.",
-    icon: "🍻",
+    icon: "🎖️",
     check: (c) => c.mine.length >= 50,
     progress: (c) => [c.mine.length, 50],
   },
@@ -341,7 +356,7 @@ export const achievements: AchievementDefinition[] = [
     id: "beer-baron",
     name: "Beer Baron",
     description: "20 beers in total.",
-    icon: "🍺",
+    icon: "🤴",
     check: (c) => count(c, (d) => d.category === "Beer") >= 20,
     progress: (c) => [count(c, (d) => d.category === "Beer"), 20],
   },
@@ -357,7 +372,7 @@ export const achievements: AchievementDefinition[] = [
     id: "jager-squad",
     name: "Jäger Squad",
     description: "5 Jägermeisters in total.",
-    icon: "🦌",
+    icon: "🌿",
     check: (c) => count(c, isJaeger) >= 5,
     progress: (c) => [count(c, isJaeger), 5],
   },
@@ -395,8 +410,62 @@ export const achievements: AchievementDefinition[] = [
     id: "weisswurst-breakfast",
     name: "Weißwurst Breakfast",
     description: "A Weizen before 12:00.",
-    icon: "🥨",
+    icon: "🌭",
     check: (c) => c.mine.some((d) => isWeizen(d) && hourOf(d) >= 6 && hourOf(d) < 12),
+  },
+  // Glühwein (Christmas markets).
+  {
+    id: "christkindl",
+    name: "Christkindl",
+    description: "Drink your first Glühwein.",
+    icon: "🎄",
+    check: (c) => c.mine.some(isGluhwein),
+  },
+  {
+    id: "warm-hands",
+    name: "Warm Hands",
+    description: "3 Glühweins in one day.",
+    icon: "🔥",
+    check: (c) => gluhweinPerDay(c) >= 3,
+    progress: (c) => [gluhweinPerDay(c), 3],
+  },
+  {
+    id: "gluhwein-five",
+    name: "Glühwein Goblin",
+    description: "5 Glühweins in one day.",
+    icon: "🧌",
+    check: (c) => gluhweinPerDay(c) >= 5,
+    progress: (c) => [gluhweinPerDay(c), 5],
+  },
+  {
+    id: "rudolph",
+    name: "Rudolph the Red-Nosed Reindeer",
+    description: "10 Glühweins in one day.",
+    icon: "🦌",
+    check: (c) => gluhweinPerDay(c) >= 10,
+    progress: (c) => [gluhweinPerDay(c), 10],
+  },
+  {
+    id: "market-crawl",
+    name: "Market Crawl",
+    description: "A Glühwein in 3 different 3-hour blocks on one day.",
+    icon: "🧣",
+    check: (c) => marketCrawl(c) >= 3,
+    progress: (c) => [marketCrawl(c), 3],
+  },
+  {
+    id: "gluhwein-weekend",
+    name: "Glühwein Weekend",
+    description: "A Glühwein on all three days of the trip.",
+    icon: "🌨️",
+    check: (c) => {
+      const days = new Set(c.mine.filter(isGluhwein).map((d) => dayKey(d.at)));
+      return TRIP_DAYS.every((k) => days.has(k));
+    },
+    progress: (c) => {
+      const days = new Set(c.mine.filter(isGluhwein).map((d) => dayKey(d.at)));
+      return [TRIP_DAYS.filter((k) => days.has(k)).length, TRIP_DAYS.length];
+    },
   },
   {
     id: "collector",

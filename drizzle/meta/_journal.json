@@ -15,6 +15,13 @@
       "when": 1795777360185,
       "tag": "0001_seed_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795781033395,
+      "tag": "0002_add_gluhwein",
+      "breakpoints": true
     }
   ]
 }
