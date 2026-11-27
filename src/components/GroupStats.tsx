@@ -1,7 +1,7 @@
 import type { Hub } from "@/lib/data";
 import { formatPoints } from "@/lib/drinks";
-import { groupStats, litreComparison } from "@/lib/stats";
-import { blockLabel, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
+import { categoryMix, groupStats, litreComparison } from "@/lib/stats";
+import { blockLabel, blockStart, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
 import { CategoryPie } from "./CategoryMix";
 import { ShowMore } from "./ShowMore";
 import { CardPanel, KpiCard, PlayerDot, SectionTitle } from "./ui";
@@ -10,6 +10,8 @@ import { CardPanel, KpiCard, PlayerDot, SectionTitle } from "./ui";
 export function GroupStats({ hub }: { hub: Hub }) {
   const g = groupStats(hub.drinks, hub.players, hub.now);
   const totalPoints = g.points || 1;
+  const thisBlock = blockStart(hub.now);
+  const blockMix = categoryMix(hub.drinks.filter((d) => blockStart(d.at) === thisBlock));
   const foldShares = g.shares.length > 7;
   const shareRow = (s: (typeof g.shares)[number]) => (
                 <li key={s.player.id} className="flex flex-col gap-1">
@@ -81,8 +83,8 @@ export function GroupStats({ hub }: { hub: Hub }) {
 
       <div className="grid gap-3 md:grid-cols-2 md:gap-5">
         <CardPanel>
-          <h3 className="mb-2 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Drinks per category</h3>
-          <CategoryPie mix={g.mix} />
+          <h3 className="mb-2 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">This block · {blockLabel(thisBlock)}</h3>
+          <CategoryPie mix={blockMix} empty="No drinks this block yet." />
         </CardPanel>
         <CardPanel>
           <h3 className="mb-3 text-[11px] font-bold tracking-[0.14em] text-ink-muted uppercase">Share of the group total</h3>
