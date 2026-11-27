@@ -26,16 +26,30 @@ const partsFormat = new Intl.DateTimeFormat("en-GB", {
   hourCycle: "h23",
 });
 
-export function berlinParts(ms: number): BerlinParts {
-  const p = Object.fromEntries(partsFormat.formatToParts(new Date(ms)).map((x) => [x.type, x.value]));
-  return {
+/**
+ * Berlin wall-clock parts are the same for a whole minute, and `Intl` formatting is slow, so
+ * results are cached per minute. The achievement replay asks for the same few hundred moments
+ * thousands of times; without the cache a person's page took seconds to render.
+ */
+const partsCache = new Map<number, Readonly<BerlinParts>>();
+const PARTS_CACHE_MAX = 50_000;
+
+export function berlinParts(ms: number): Readonly<BerlinParts> {
+  const minute = Math.floor(ms / 60_000);
+  const hit = partsCache.get(minute);
+  if (hit) return hit;
+  const p = Object.fromEntries(partsFormat.formatToParts(new Date(minute * 60_000)).map((x) => [x.type, x.value]));
+  const parts = Object.freeze({
     year: Number(p.year),
     month: Number(p.month),
     day: Number(p.day),
     hour: Number(p.hour),
     minute: Number(p.minute),
     weekday: p.weekday,
-  };
+  });
+  if (partsCache.size >= PARTS_CACHE_MAX) partsCache.clear();
+  partsCache.set(minute, parts);
+  return parts;
 }
 
 /** Start of the Berlin hour containing `ms`. */
@@ -44,7 +58,19 @@ export function hourStart(ms: number): number {
 }
 
 /** The 06:00-to-06:00 day `ms` belongs to, as "YYYY-MM-DD" (the date the day starts on). */
+const dayKeyCache = new Map<number, string>();
+
 export function dayKey(ms: number): string {
+  const minute = Math.floor(ms / 60_000);
+  const hit = dayKeyCache.get(minute);
+  if (hit !== undefined) return hit;
+  const key = computeDayKey(ms);
+  if (dayKeyCache.size >= PARTS_CACHE_MAX) dayKeyCache.clear();
+  dayKeyCache.set(minute, key);
+  return key;
+}
+
+function computeDayKey(ms: number): string {
   const p = berlinParts(ms);
   const d = new Date(Date.UTC(p.year, p.month - 1, p.day));
   if (p.hour < DAY_START_HOUR) d.setUTCDate(d.getUTCDate() - 1);
