@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 
 export type StripChip = { key: string; href: string; label: string; sub?: string; crown?: boolean; live?: boolean };
 
-/** Horizontally scrolling chips (hours or days); the selected one is centred on load/change. Links, not state. */
+/** Horizontally scrolling chips (3-hour blocks or days); the selected one is centred on load/change. Links, not state. */
 export function HourStrip({ chips, selected }: { chips: StripChip[]; selected: string }) {
   const ref = useRef<HTMLAnchorElement>(null);
   useEffect(() => {

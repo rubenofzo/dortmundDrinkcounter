@@ -1,7 +1,7 @@
 import type { Hub } from "@/lib/data";
 import { formatPoints } from "@/lib/drinks";
 import { groupStats, litreComparison } from "@/lib/stats";
-import { dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
+import { blockLabel, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
 import { CategoryPie } from "./CategoryMix";
 import { formatSpan } from "./StatTiles";
 import { CardPanel, KpiCard, PlayerDot, SectionTitle } from "./ui";
@@ -21,15 +21,15 @@ export function GroupStats({ hub }: { hub: Hub }) {
         <KpiCard icon="🪣" label="Liquid" value={`${g.liters.toFixed(1)} L`} sub={litreComparison(g.liters)} />
         <KpiCard
           icon="🔥"
-          label="Biggest hour"
+          label="Biggest block"
           value={g.biggestHour ? `${formatPoints(g.biggestHour.points)} pts` : "–"}
-          sub={g.biggestHour ? `${g.biggestHour.player.name}, ${hourLabel(g.biggestHour.hour)}` : undefined}
+          sub={g.biggestHour ? `${g.biggestHour.player.name}, ${blockLabel(g.biggestHour.hour)}` : undefined}
         />
         <KpiCard
           icon="🎉"
-          label="Busiest hour"
+          label="Busiest block"
           value={g.busiestHour ? `${formatPoints(g.busiestHour.points)} pts` : "–"}
-          sub={g.busiestHour ? hourLabel(g.busiestHour.hour) : undefined}
+          sub={g.busiestHour ? blockLabel(g.busiestHour.hour) : undefined}
         />
         <KpiCard
           icon="⛰️"

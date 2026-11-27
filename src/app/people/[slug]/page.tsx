@@ -8,7 +8,7 @@ import { PlayerAchievements } from "@/components/PlayerAchievements";
 import { StatTiles } from "@/components/StatTiles";
 import { HallPanel, SectionTitle } from "@/components/ui";
 import { getHub } from "@/lib/data";
-import { hourChartData } from "@/lib/hours";
+import { blockChartData } from "@/lib/hours";
 import { playerStats } from "@/lib/stats";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -27,7 +27,7 @@ export default async function PersonPage({ params }: Props) {
 
   const mine = hub.drinks.filter((d) => d.playerId === player.id);
   const stats = playerStats(mine, hub.now);
-  const chart = hourChartData(hub.drinks, hub.players, hub.now, [player.id]);
+  const chart = blockChartData(hub.drinks, hub.players, hub.now, [player.id]);
 
   return (
     <main className="flex flex-col gap-4 md:gap-8">
@@ -38,7 +38,7 @@ export default async function PersonPage({ params }: Props) {
       <StatTiles s={stats} />
       <PlayerAchievements playerId={player.id} />
       <HallPanel className="flex flex-col gap-3">
-        <SectionTitle className="uppercase">Points per hour</SectionTitle>
+        <SectionTitle className="uppercase">Points per 3 hours</SectionTitle>
         <HourChart points={chart.points} series={chart.series} />
       </HallPanel>
       <section className="flex flex-col gap-3">

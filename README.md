@@ -1,8 +1,8 @@
 # Drinkhub · Sticky Dortmund
 
 Drink counter for our weekend away in Dortmund (Friday 27 to Sunday 29 November 2026).
-Anyone can log a drink for anyone in two taps; the site turns that into an hourly
-leaderboard (Hour Champions), fun stats, a rough "still in the system" estimate and
+Anyone can log a drink for anyone in two taps; the site turns that into a leaderboard per
+3-hour block (Block Champions), fun stats, a rough "still in the system" estimate and
 Steam-style achievements. The admin (one shared password) can fix players, drinks and the menu.
 
 Built with Next.js 16 (App Router), TypeScript, Tailwind 4, Drizzle ORM on Postgres, and
@@ -56,7 +56,7 @@ apply retroactively. The context fields are documented in
 ## Project layout
 
 - `src/lib/data.ts` – `getHub()`: loads players, menu and drinks once per request
-- `src/lib/time.ts`, `hours.ts` – Europe/Berlin hour and day buckets
+- `src/lib/time.ts`, `hours.ts` – Europe/Berlin hour, 3-hour block and day buckets
 - `src/lib/leaderboard.ts`, `stats.ts`, `metabolism.ts` – pure, tested calculations
 - `src/achievements/` – definitions and the replay engine
 - `src/app/` – pages: home, `leaderboard`, `people/[slug]`, `achievements`, `admin`

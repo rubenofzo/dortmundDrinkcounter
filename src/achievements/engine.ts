@@ -1,6 +1,6 @@
 import type { Drink, Player } from "@/lib/data";
-import { hourWinners } from "@/lib/leaderboard";
-import { berlinParts, dayKey, HOUR_MS, hourStart } from "@/lib/time";
+import { blockWinners } from "@/lib/leaderboard";
+import { berlinParts, blockEnd, blockStart, dayKey, HOUR_MS, hourStart } from "@/lib/time";
 import { achievements as defaultDefinitions } from "./definitions";
 import { rarityTier, TIER_LABEL, type RarityTier } from "./rarity";
 import type { AchievementContext, AchievementDefinition, DayInfo } from "./types";
@@ -19,7 +19,7 @@ export type EngineInput = {
 export type Unlock = {
   achievementId: string;
   playerId: number;
-  /** When it was earned, ms (the drink's time, or the end of the hour for hour-based ones). */
+  /** When it was earned, ms (the drink's time, or the end of the block for block-based ones). */
   at: number;
 };
 
@@ -59,7 +59,7 @@ export function dayEndMs(key: string): number {
 /**
  * Replays the weekend in time order. The moments that are looked at are every drink, every
  * undo, the end of every hour that had a drink, 2 hours after every drink and the end of every
- * day (so group and hour-based achievements settle at the right time), plus `now`. At each
+ * day (so group and block-based achievements settle at the right time), plus `now`. At each
  * moment every player who has drunk is checked, repeating until nothing new unlocks.
  */
 export function evaluateAchievements(
@@ -74,7 +74,7 @@ export function evaluateAchievements(
   const times = new Set<number>([hub.now]);
   for (const d of sorted) {
     times.add(d.at);
-    times.add(hourStart(d.at) + HOUR_MS);
+    times.add(blockEnd(blockStart(d.at)));
     times.add(d.at + 2 * HOUR_MS);
     times.add(dayEndMs(dayKey(d.at)));
   }
@@ -103,7 +103,7 @@ export function evaluateAchievements(
       const d = deleted[xi++];
       deletedCount.set(d.playerId, (deletedCount.get(d.playerId) ?? 0) + 1);
     }
-    const winners = hourWinners(soFar, at);
+    const winners = blockWinners(soFar, at);
 
     for (const player of hub.players) {
       const mine = mineBy.get(player.id);
@@ -116,7 +116,7 @@ export function evaluateAchievements(
         drinks: soFar,
         mine,
         deletedCount: deletedCount.get(player.id) ?? 0,
-        hourWins: [...winners]
+        blockWins: [...winners]
           .filter(([, ids]) => ids.includes(player.id))
           .map(([h]) => h)
           .sort((a, b) => a - b),

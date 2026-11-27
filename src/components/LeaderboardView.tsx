@@ -5,13 +5,13 @@ import { HourStrip, type StripChip } from "@/components/HourStrip";
 import { RankingList } from "@/components/RankingList";
 import { EmptyState, HallPanel, PageTitle, SectionTitle } from "@/components/ui";
 import type { Hub } from "@/lib/data";
-import { tripHours } from "@/lib/hours";
-import { hourWinners, rankDrinks } from "@/lib/leaderboard";
-import { dayKey, dayLabel, HOUR_MS, hourLabel, hourStart, TRIP_DAYS } from "@/lib/time";
+import { tripBlocks } from "@/lib/hours";
+import { blockWinners, rankDrinks } from "@/lib/leaderboard";
+import { blockEnd, blockLabel, blockStart, dayKey, dayLabel, TRIP_DAYS } from "@/lib/time";
 
 export type Tab = "hour" | "day" | "weekend";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "hour", label: "Hour" },
+  { key: "hour", label: "3 hours" },
   { key: "day", label: "Day" },
   { key: "weekend", label: "Weekend" },
 ];
@@ -20,34 +20,34 @@ const TABS: { key: Tab; label: string }[] = [
 export function LeaderboardView({ hub, tab, h, d }: { hub: Hub; tab: Tab; h?: number; d?: string }) {
   const { drinks, players, now } = hub;
   const playerById = new Map(players.map((p) => [p.id, p]));
-  const winners = hourWinners(drinks, now);
+  const winners = blockWinners(drinks, now);
 
   let body: React.ReactNode;
   if (tab === "hour") {
-    const hours = tripHours(drinks, now);
-    const current = hourStart(now);
+    const hours = tripBlocks(drinks, now);
+    const current = blockStart(now);
     const fallback = hours.includes(current) ? current : hours[hours.length - 1];
     const sel = h !== undefined && hours.includes(h) ? h : fallback;
     const chips: StripChip[] = hours.map((x) => ({
       key: String(x),
       href: `/leaderboard?tab=hour&h=${x}`,
-      label: hourLabel(x),
+      label: blockLabel(x),
       crown: winners.has(x),
       live: x === current,
     }));
     const rows = rankDrinks(
-      drinks.filter((x) => hourStart(x.at) === sel),
+      drinks.filter((x) => blockStart(x.at) === sel),
       players,
     );
-    const done = sel + HOUR_MS <= now;
+    const done = blockEnd(sel) <= now;
     body = (
       <>
         <HourStrip chips={chips} selected={String(sel)} />
         <HallPanel>
           <SectionTitle className="mb-3 uppercase">
-            {hourLabel(sel)} {sel === current ? "· live" : ""}
+            {blockLabel(sel)} {sel === current ? "· live" : ""}
           </SectionTitle>
-          {rows.length === 0 ? <p className="text-mist">No drinks in this hour.</p> : <RankingList rows={rows} crowned={done} />}
+          {rows.length === 0 ? <p className="text-mist">No drinks in this block.</p> : <RankingList rows={rows} crowned={done} />}
         </HallPanel>
         <HallOfHours winners={winners} playerById={playerById} />
       </>
