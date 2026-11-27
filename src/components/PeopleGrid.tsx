@@ -18,7 +18,7 @@ export type TileData = {
   load: string;
 };
 
-/** "Drink for me" button, the big tappable tiles for everyone else, the drink picker sheet and the log toast. */
+/** "Add a drink" button (for yourself), the big tappable tiles for everyone else, the drink picker sheet and the log toast. */
 export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[] }) {
   const router = useRouter();
   const [target, setTarget] = useState<TileData | null>(null);
@@ -65,7 +65,7 @@ export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[
               <PlayerDot color={me.color} size={12} on="hall" />
               <span className="min-w-0 truncate text-[17px] font-extrabold">{me.name}</span>
             </span>
-            <span className="font-display text-[28px] leading-none uppercase">Drink for me</span>
+            <span className="font-display text-[28px] leading-none uppercase">Add a drink</span>
             <span className="tabular text-[12px] text-foam/80">
               {me.todayPoints} pts today · {me.todayCount} 🍺
             </span>
