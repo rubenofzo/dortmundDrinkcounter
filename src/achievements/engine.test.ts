@@ -164,3 +164,35 @@ describe("achievement engine", () => {
     expect(run([drink(1, fri(24 + 4, 59))], fri(24 + 9)).get("sunrise-session", 1)).toBeUndefined();
   });
 });
+
+describe("Glühwein achievements", () => {
+  const gw = (playerId: number, at: number) => drink(playerId, at, { name: "Glühwein", category: "Wine", ml: 200, abv: 10 });
+
+  it("Christkindl, Warm Hands and the per-day counts use the 06:00 day", () => {
+    // Five Glühweins from 22:00 to 02:00 count as one day.
+    const drinks = [gw(1, fri(22)), gw(1, fri(23)), gw(1, fri(0, 0, 28)), gw(1, fri(1, 0, 28)), gw(1, fri(2, 0, 28))];
+    const { get } = run(drinks, fri(3, 0, 28));
+    expect(get("christkindl", 1)?.at).toBe(fri(22));
+    expect(get("warm-hands", 1)?.at).toBe(fri(0, 0, 28));
+    expect(get("gluhwein-five", 1)?.at).toBe(fri(2, 0, 28));
+    expect(get("rudolph", 1)).toBeUndefined();
+  });
+
+  it("Rudolph needs 10 in one day", () => {
+    const drinks = Array.from({ length: 10 }, (_, i) => gw(2, fri(12) + i * 20 * 60_000));
+    expect(run(drinks, fri(20)).get("rudolph", 2)?.at).toBe(fri(15));
+  });
+
+  it("Market Crawl needs 3 different blocks on one day", () => {
+    const two = [gw(3, fri(12, 30)), gw(3, fri(14, 30)), gw(3, fri(16))];
+    expect(run(two, fri(20)).get("market-crawl", 3)).toBeUndefined();
+    const three = [...two, gw(3, fri(19))];
+    expect(run(three, fri(20)).get("market-crawl", 3)?.at).toBe(fri(19));
+  });
+
+  it("Glühwein Weekend needs one on each trip day", () => {
+    const drinks = [gw(4, fri(20)), gw(4, fri(20, 0, 28)), gw(4, fri(1, 0, 30))];
+    // The last one is Mon 01:00, which still belongs to Sunday's day.
+    expect(run(drinks, fri(2, 0, 30)).get("gluhwein-weekend", 4)?.at).toBe(fri(1, 0, 30));
+  });
+});
