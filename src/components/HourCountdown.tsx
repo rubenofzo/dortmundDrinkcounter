@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatCountdown } from "@/lib/time";
 
-/** Live "m:ss" until `endMs`, seeded from the server's `now` so a wrong phone clock doesn't matter. */
+/** Live "h:mm:ss" / "m:ss" until `endMs`, seeded from the server's `now` so a wrong phone clock doesn't matter. */
 export function HourCountdown({ endMs, seedNow, className }: { endMs: number; seedNow: number; className?: string }) {
   const [tick, setTick] = useState({ seed: seedNow, ms: 0 });
   const elapsed = tick.seed === seedNow ? tick.ms : 0;

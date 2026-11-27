@@ -1,7 +1,7 @@
 import type { Drink, Player } from "./data";
 import { PILS_HALBE_POINTS, pureMlOf } from "./drinks";
 import { loadAt, loadCurve, peakLoad, processedBy } from "./metabolism";
-import { berlinParts, dayKey, HOUR_MS, hourStart } from "./time";
+import { berlinParts, blockStart, dayKey, HOUR_MS, hourStart } from "./time";
 
 /*
  * Fun stats: pure functions over drinks. Nothing here looks at `loggedByPlayerId`: a drink
@@ -33,14 +33,14 @@ export function litreComparison(liters: number): string {
   return "a whole beer keg and then some";
 }
 
-/** Points per hour bucket: Map<hourMs, points>. */
+/** Points per 3-hour leaderboard block: Map<blockStartMs, points>. */
 function hourTotals(drinks: Drink[]): Map<number, number> {
   const m = new Map<number, number>();
-  for (const d of drinks) m.set(hourStart(d.at), (m.get(hourStart(d.at)) ?? 0) + d.points);
+  for (const d of drinks) m.set(blockStart(d.at), (m.get(blockStart(d.at)) ?? 0) + d.points);
   return m;
 }
 
-/** The best single hour (most points); ties go to the earlier hour. */
+/** The best 3-hour block (most points; `hour` is the block start); ties go to the earlier block. */
 export function bestHour(drinks: Drink[]): { hour: number; points: number } | null {
   let best: { hour: number; points: number } | null = null;
   for (const [hour, points] of [...hourTotals(drinks)].sort((a, b) => a[0] - b[0])) {

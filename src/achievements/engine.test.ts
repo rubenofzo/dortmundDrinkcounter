@@ -69,8 +69,8 @@ describe("achievement engine", () => {
     expect(get("prost", 5)).toBeUndefined();
   });
 
-  it("Hour Champion counts completed hours only and unlocks at the end of the hour", () => {
-    const drinks = [drink(1, fri(20, 10)), drink(1, fri(20, 20)), drink(2, fri(20, 30))];
+  it("Block Champion counts completed blocks only and unlocks at the block end", () => {
+    const drinks = [drink(1, fri(18, 10)), drink(1, fri(19, 20)), drink(2, fri(20, 30))];
     expect(run(drinks, fri(20, 50)).get("hour-champion", 1)).toBeUndefined();
     expect(run(drinks, fri(21, 5)).get("hour-champion", 1)?.at).toBe(fri(21));
     expect(run(drinks, fri(21, 5)).get("hour-champion", 2)).toBeUndefined();
@@ -129,11 +129,38 @@ describe("achievement engine", () => {
     expect(b.r.recent.map((u) => u.achievementId)).toEqual(a.r.recent.map((u) => u.achievementId));
   });
 
-  it("Dynasty needs consecutive hours", () => {
-    const drinks = [drink(1, fri(20, 5)), drink(1, fri(21, 5)), drink(1, fri(22, 5))];
-    expect(run(drinks, fri(23, 30)).get("dynasty", 1)?.at).toBe(fri(23));
-    const gap = [drink(1, fri(20, 5)), drink(1, fri(21, 5)), drink(1, fri(23, 5))];
-    expect(run(gap, fri(25)).get("dynasty", 1)).toBeUndefined();
+  it("Dynasty needs consecutive blocks", () => {
+    const drinks = [drink(1, fri(18, 5)), drink(1, fri(21, 5)), drink(1, fri(24, 5))];
+    expect(run(drinks, fri(27, 30)).get("dynasty", 1)?.at).toBe(fri(27));
+    const gap = [drink(1, fri(15, 5)), drink(1, fri(18, 5)), drink(1, fri(24, 5))];
+    expect(run(gap, fri(30)).get("dynasty", 1)).toBeUndefined();
     expect(HOUR_MS).toBe(3_600_000);
+  });
+
+  it("Half Century unlocks on the 50th drink", () => {
+    const ds = Array.from({ length: 50 }, (_, i) => drink(1, fri(12) + i * 60_000));
+    expect(run(ds, fri(14)).get("half-century", 1)?.at).toBe(fri(12) + 49 * 60_000);
+    expect(run(ds.slice(0, 49), fri(14)).get("half-century", 1)).toBeUndefined();
+    expect(run(ds, fri(14)).get("quarter-century", 1)?.at).toBe(fri(12) + 24 * 60_000);
+  });
+
+  it("Night Shift needs a drink in each hour from 22:00 to 03:xx on one night", () => {
+    const hours = [22, 23, 24, 25, 26, 27];
+    const ds = hours.map((h) => drink(1, fri(h, 10)));
+    expect(run(ds, fri(30)).get("night-shift", 1)?.at).toBe(fri(27, 10));
+    expect(run(ds.slice(0, 5), fri(30)).get("night-shift", 1)).toBeUndefined();
+  });
+
+  it("Zombie Mode needs 03-06 and 06-10 drinks on the same morning", () => {
+    expect(run([drink(1, fri(24 + 4)), drink(1, fri(24 + 7))], fri(24 + 12)).get("zombie-mode", 1)?.at).toBe(fri(24 + 7));
+    expect(run([drink(1, fri(24 + 4)), drink(1, fri(48 + 7))], fri(48 + 12)).get("zombie-mode", 1)).toBeUndefined();
+    expect(run([drink(1, fri(24 + 4)), drink(1, fri(24 + 11))], fri(24 + 12)).get("zombie-mode", 1)).toBeUndefined();
+  });
+
+  it("Sunrise Session covers 05:00 to 08:00", () => {
+    expect(run([drink(1, fri(24 + 5))], fri(24 + 9)).get("sunrise-session", 1)?.at).toBe(fri(24 + 5));
+    expect(run([drink(1, fri(24 + 7, 59))], fri(24 + 9)).get("sunrise-session", 1)).toBeDefined();
+    expect(run([drink(1, fri(24 + 8))], fri(24 + 9)).get("sunrise-session", 1)).toBeUndefined();
+    expect(run([drink(1, fri(24 + 4, 59))], fri(24 + 9)).get("sunrise-session", 1)).toBeUndefined();
   });
 });

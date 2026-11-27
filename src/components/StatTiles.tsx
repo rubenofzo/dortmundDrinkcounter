@@ -1,6 +1,6 @@
 import { formatPoints } from "@/lib/drinks";
 import type { PlayerStats } from "@/lib/stats";
-import { dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
+import { blockLabel, dayLabel, formatClock, formatDayTime, hourLabel } from "@/lib/time";
 import { CardPanel, KpiCard } from "./ui";
 import { CategoryMixBar } from "./CategoryMix";
 
@@ -25,7 +25,7 @@ export function StatTiles({ s }: { s: PlayerStats }) {
           value={s.pace ? `${formatPoints(s.pace.perHour)}/h` : "–"}
           sub={s.pace ? `since ${formatClock(s.pace.since)}` : "points per hour"}
         />
-        <KpiCard icon="🔥" label="Best hour" value={s.bestHour ? `${formatPoints(s.bestHour.points)} pts` : "–"} sub={s.bestHour ? hourLabel(s.bestHour.hour) : undefined} />
+        <KpiCard icon="🔥" label="Best block" value={s.bestHour ? `${formatPoints(s.bestHour.points)} pts` : "–"} sub={s.bestHour ? blockLabel(s.bestHour.hour) : undefined} />
         <KpiCard
           icon="🏃"
           label="Longest streak"

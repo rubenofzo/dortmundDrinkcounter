@@ -32,7 +32,7 @@ export function TripStrip({
         {[
           ["Drinks", String(drinks)],
           ["Points", points],
-          ["This hour", hourPoints],
+          ["This block", hourPoints],
         ].map(([k, v]) => (
           <div key={k}>
             <dd className="tabular font-display text-[28px] leading-none md:text-4xl">{v}</dd>

@@ -1,5 +1,5 @@
 import type { Drink, Player } from "./data";
-import { HOUR_MS, hourStart } from "./time";
+import { blockEnd, blockStart } from "./time";
 
 export type Ranked = { player: Player; points: number; drinks: number; topIcon: string; rank: number };
 
@@ -35,12 +35,15 @@ export function rankDrinks(drinks: Drink[], players: Player[]): Ranked[] {
   return rows;
 }
 
-/** Winners per COMPLETED hour bucket (hour end <= now) that had drinks: Map<hourStartMs, playerId[]> (ties all win), ordered by hour. */
-export function hourWinners(drinks: Drink[], now: number): Map<number, number[]> {
+/**
+ * Winners per COMPLETED 3-hour block (block end <= now) that had drinks:
+ * Map<blockStartMs, playerId[]> (ties all win), ordered by time.
+ */
+export function blockWinners(drinks: Drink[], now: number): Map<number, number[]> {
   const perHour = new Map<number, Map<number, number>>();
   for (const d of drinks) {
-    const h = hourStart(d.at);
-    if (h + HOUR_MS > now) continue;
+    const h = blockStart(d.at);
+    if (blockEnd(h) > now) continue;
     const row = perHour.get(h) ?? new Map<number, number>();
     row.set(d.playerId, (row.get(d.playerId) ?? 0) + d.points);
     perHour.set(h, row);

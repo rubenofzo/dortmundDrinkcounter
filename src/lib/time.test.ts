@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayKey, formatClock, hourLabel, hourStart, tripClock, tripDayNumber } from "./time";
+import { blockEnd, blockLabel, blocksBetween, blockStart, dayKey, formatCountdown, formatClock, hourLabel, hourStart, tripClock, tripDayNumber } from "./time";
 
 // Friday 27 Nov 2026 is CET (UTC+1).
 const berlin = (d: number, h: number, m = 0) => Date.UTC(2026, 10, d, h - 1, m);
@@ -31,5 +31,29 @@ describe("days with the 06:00 cut-off", () => {
     expect(dayKey(Date.UTC(2026, 10, 27, 23, 30))).toBe("2026-11-27");
     // 05:30 UTC on the 28th is 06:30 Berlin: day 2.
     expect(dayKey(Date.UTC(2026, 10, 28, 5, 30))).toBe("2026-11-28");
+  });
+});
+
+describe("3-hour blocks", () => {
+  it("start at 12, 15, 18, 21 Berlin", () => {
+    expect(blockStart(berlin(27, 13, 59))).toBe(berlin(27, 12));
+    expect(blockStart(berlin(27, 15, 0))).toBe(berlin(27, 15));
+    expect(blockStart(berlin(27, 23, 30))).toBe(berlin(27, 21));
+    expect(blockStart(berlin(28, 1, 0))).toBe(berlin(28, 0));
+  });
+  it("label and step", () => {
+    expect(blockLabel(berlin(27, 21))).toBe("Fri 21–24");
+    expect(blockLabel(berlin(27, 12))).toBe("Fri 12–15");
+    expect(blockEnd(berlin(27, 21))).toBe(berlin(28, 0));
+    expect(blocksBetween(berlin(27, 12, 5), berlin(27, 20))).toEqual([berlin(27, 12), berlin(27, 15), berlin(27, 18)]);
+  });
+});
+
+const HOUR = 3_600_000;
+
+describe("formatCountdown", () => {
+  it("shows hours for a 3-hour block", () => {
+    expect(formatCountdown(125_000)).toBe("2:05");
+    expect(formatCountdown(2 * HOUR + 12 * 60_000 + 4_000)).toBe("2:12:04");
   });
 });

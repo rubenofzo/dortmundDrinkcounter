@@ -6,7 +6,7 @@ import type { Ranked } from "@/lib/leaderboard";
 
 /**
  * Big phone-friendly ranking rows (≥56px). Rank-1 rows get the red accent; `crowned` marks
- * leaders of a finished hour with a gold crown. `tone` picks dark hall or light foam backing.
+ * leaders of a finished 3-hour block with a gold crown. `tone` picks dark hall or light foam backing.
  */
 export function RankingList({
   rows,
@@ -51,7 +51,7 @@ export function RankingList({
                 <span className="flex items-center gap-1.5 text-[17px] font-bold md:text-lg">
                   <span className="truncate">{r.player.name}</span>
                   {crowned && lead && (
-                    <span aria-label="Hour champion" className="text-gold drop-shadow">
+                    <span aria-label="Block champion" className="text-gold drop-shadow">
                       👑
                     </span>
                   )}

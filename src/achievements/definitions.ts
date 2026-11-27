@@ -1,9 +1,9 @@
-import { berlinParts, HOUR_MS, TRIP_DAYS, dayKey, hourStart } from "@/lib/time";
+import { berlinParts, blockEnd, blockStart, calendarDate, HOUR_MS, TRIP_DAYS, dayKey, hourStart } from "@/lib/time";
 import type { Drink } from "@/lib/data";
 import type { AchievementContext, AchievementDefinition } from "./types";
 
 /*
- * The 24 achievements. None of them looks at `loggedByPlayerId`: who tapped the button is
+ * The achievements. None of them looks at `loggedByPlayerId`: who tapped the button is
  * irrelevant, only who drank. Group rules (Early Bird, Last One Standing, Century) look at
  * `ctx.days`, which covers everybody's drinks up to the moment being evaluated.
  */
@@ -12,7 +12,7 @@ const MINUTE_MS = 60_000;
 
 const count = (ctx: AchievementContext, test: (d: Drink) => boolean) => ctx.mine.filter(test).length;
 
-/** Largest number of a player's drinks matching `test` in one bucket (hour or day). */
+/** Largest number of a player's drinks matching `test` in one bucket (hour, block or day). */
 function maxPerBucket(ctx: AchievementContext, test: (d: Drink) => boolean, bucket: (d: Drink) => string | number) {
   const counts = new Map<string | number, number>();
   let best = 0;
@@ -65,9 +65,33 @@ function clockHoursByDay(ctx: AchievementContext): Map<string, Set<number>> {
   return out;
 }
 
-/** Longest run of consecutive hour-wins. */
+/** Longest run of consecutive block-wins (a block follows another when blockEnd(prev) === next). */
 function winRun(wins: readonly number[]): number {
-  return longestHourRun([...wins]);
+  let best = 0;
+  let run = 0;
+  for (let i = 0; i < wins.length; i++) {
+    run = i > 0 && blockEnd(wins[i - 1]) === wins[i] ? run + 1 : 1;
+    best = Math.max(best, run);
+  }
+  return best;
+}
+
+const hourOf = (d: Drink) => berlinParts(d.at).hour;
+const totalMl = (c: AchievementContext) => c.mine.reduce((s, d) => s + d.ml, 0);
+const isSmallPils = (d: Drink) => /pils/i.test(d.name) && /small/i.test(d.name);
+const isJaeger = (d: Drink) => /j[äa]ger/i.test(d.name);
+const isSekt = (d: Drink) => /sekt|prosecco/i.test(d.name);
+const isWeizen = (d: Drink) => /weizen/i.test(d.name);
+
+/** Most distinct "night shift" hours (22, 23, 0, 1, 2, 3) in any one day. */
+const NIGHT_HOURS = [22, 23, 0, 1, 2, 3];
+const nightHours = (c: AchievementContext) =>
+  Math.max(0, ...[...clockHoursByDay(c).values()].map((hours) => NIGHT_HOURS.filter((h) => hours.has(h)).length));
+
+/** A drink 03:00-06:00 and another 06:00-10:00 on the same Berlin calendar morning. */
+function zombie(c: AchievementContext): boolean {
+  const early = new Set(c.mine.filter((d) => hourOf(d) >= 3 && hourOf(d) < 6).map((d) => calendarDate(d.at)));
+  return c.mine.some((d) => hourOf(d) >= 6 && hourOf(d) < 10 && early.has(calendarDate(d.at)));
 }
 
 const STEADY_HOURS = [20, 21, 22, 23, 0];
@@ -97,27 +121,27 @@ export const achievements: AchievementDefinition[] = [
   },
   {
     id: "hour-champion",
-    name: "Hour Champion",
-    description: "Win an hour on the leaderboard.",
+    name: "Block Champion",
+    description: "Win a 3-hour block on the leaderboard.",
     icon: "👑",
-    check: (c) => c.hourWins.length >= 1,
-    progress: (c) => [c.hourWins.length, 1],
+    check: (c) => c.blockWins.length >= 1,
+    progress: (c) => [c.blockWins.length, 1],
   },
   {
     id: "hat-trick",
     name: "Hat Trick",
-    description: "Win 3 hours.",
+    description: "Win 3 blocks.",
     icon: "🎩",
-    check: (c) => c.hourWins.length >= 3,
-    progress: (c) => [c.hourWins.length, 3],
+    check: (c) => c.blockWins.length >= 3,
+    progress: (c) => [c.blockWins.length, 3],
   },
   {
     id: "dynasty",
     name: "Dynasty",
-    description: "Win 3 hours in a row.",
+    description: "Win 3 blocks in a row.",
     icon: "🏰",
-    check: (c) => winRun(c.hourWins) >= 3,
-    progress: (c) => [winRun(c.hourWins), 3],
+    check: (c) => winRun(c.blockWins) >= 3,
+    progress: (c) => [winRun(c.blockWins), 3],
   },
   {
     id: "halbe-hero",
@@ -138,10 +162,10 @@ export const achievements: AchievementDefinition[] = [
   {
     id: "shot-caller",
     name: "Shot Caller",
-    description: "3 shots in one hour.",
+    description: "3 shots in one block.",
     icon: "🎯",
-    check: (c) => maxPerBucket(c, (d) => d.category === "Shots", (d) => hourStart(d.at)) >= 3,
-    progress: (c) => [maxPerBucket(c, (d) => d.category === "Shots", (d) => hourStart(d.at)), 3],
+    check: (c) => maxPerBucket(c, (d) => d.category === "Shots", (d) => blockStart(d.at)) >= 3,
+    progress: (c) => [maxPerBucket(c, (d) => d.category === "Shots", (d) => blockStart(d.at)), 3],
   },
   {
     id: "wine-mom",
@@ -240,14 +264,13 @@ export const achievements: AchievementDefinition[] = [
   {
     id: "comeback-kid",
     name: "Comeback Kid",
-    description: "Win an hour after 3 hours with no drinks.",
+    description: "Win a block after a whole block (3 hours) with no drinks.",
     icon: "🔁",
     check: (c) =>
-      c.hourWins.some(
-        (h) =>
-          c.mine.some((d) => d.at < h - 3 * HOUR_MS) &&
-          !c.mine.some((d) => d.at >= h - 3 * HOUR_MS && d.at < h),
-      ),
+      c.blockWins.some((b) => {
+        const prev = blockStart(b - 1);
+        return c.mine.some((d) => d.at < prev) && !c.mine.some((d) => d.at >= prev && d.at < b);
+      }),
   },
   {
     id: "liter-club",
@@ -289,6 +312,91 @@ export const achievements: AchievementDefinition[] = [
       const days = new Set(c.mine.map((d) => dayKey(d.at)));
       return [TRIP_DAYS.filter((k) => days.has(k)).length, TRIP_DAYS.length];
     },
+  },
+  {
+    id: "quarter-century",
+    name: "Quarter Century",
+    description: "25 drinks in total.",
+    icon: "🥉",
+    check: (c) => c.mine.length >= 25,
+    progress: (c) => [c.mine.length, 25],
+  },
+  {
+    id: "half-century",
+    name: "Half Century",
+    description: "50 drinks in total.",
+    icon: "🍻",
+    check: (c) => c.mine.length >= 50,
+    progress: (c) => [c.mine.length, 50],
+  },
+  {
+    id: "human-keg",
+    name: "Human Keg",
+    description: "10 litres in total.",
+    icon: "🛢️",
+    check: (c) => totalMl(c) >= 10000,
+    progress: (c) => [Math.round(totalMl(c) / 100) / 10, 10],
+  },
+  {
+    id: "beer-baron",
+    name: "Beer Baron",
+    description: "20 beers in total.",
+    icon: "🍺",
+    check: (c) => count(c, (d) => d.category === "Beer") >= 20,
+    progress: (c) => [count(c, (d) => d.category === "Beer"), 20],
+  },
+  {
+    id: "student-budget",
+    name: "Student Budget",
+    description: "10 small Pils in total.",
+    icon: "💸",
+    check: (c) => count(c, isSmallPils) >= 10,
+    progress: (c) => [count(c, isSmallPils), 10],
+  },
+  {
+    id: "jager-squad",
+    name: "Jäger Squad",
+    description: "5 Jägermeisters in total.",
+    icon: "🦌",
+    check: (c) => count(c, isJaeger) >= 5,
+    progress: (c) => [count(c, isJaeger), 5],
+  },
+  {
+    id: "prosecco-problems",
+    name: "Prosecco Problems",
+    description: "5 Sekt or Prosecco in total.",
+    icon: "🥂",
+    check: (c) => count(c, isSekt) >= 5,
+    progress: (c) => [count(c, isSekt), 5],
+  },
+  {
+    id: "sunrise-session",
+    name: "Sunrise Session",
+    description: "A drink between 05:00 and 08:00.",
+    icon: "🌄",
+    check: (c) => c.mine.some((d) => hourOf(d) >= 5 && hourOf(d) < 8),
+  },
+  {
+    id: "night-shift",
+    name: "Night Shift",
+    description: "At least 1 drink in every hour from 22:00 to 04:00 on one night.",
+    icon: "🌙",
+    check: (c) => nightHours(c) >= NIGHT_HOURS.length,
+    progress: (c) => [nightHours(c), NIGHT_HOURS.length],
+  },
+  {
+    id: "zombie-mode",
+    name: "Zombie Mode",
+    description: "A drink between 03:00 and 06:00 and another between 06:00 and 10:00 the same morning.",
+    icon: "🧟",
+    check: zombie,
+  },
+  {
+    id: "weisswurst-breakfast",
+    name: "Weißwurst Breakfast",
+    description: "A Weizen before 12:00.",
+    icon: "🥨",
+    check: (c) => c.mine.some((d) => isWeizen(d) && hourOf(d) >= 6 && hourOf(d) < 12),
   },
   {
     id: "collector",

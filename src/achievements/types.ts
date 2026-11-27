@@ -19,12 +19,12 @@ export type DayInfo = {
 
 /**
  * Everything an achievement can look at. The engine builds one of these for every player at
- * every moment something happens (a drink, an undo, the end of an hour or a night), in time
+ * every moment something happens (a drink, an undo, the end of a 3-hour block or a night), in time
  * order, so a check sees the world as it was at that moment.
  */
 export type AchievementContext = {
   player: Player;
-  /** The moment being evaluated, ms. Hours that ended at or before it count as completed. */
+  /** The moment being evaluated, ms. Blocks that ended at or before it count as completed. */
   at: number;
   /** Everything the group drank up to `at`, oldest first. */
   drinks: readonly Drink[];
@@ -32,8 +32,8 @@ export type AchievementContext = {
   mine: readonly Drink[];
   /** How many of this player's drinks were undone or deleted up to `at`. */
   deletedCount: number;
-  /** Hours (start ms) this player won, completed hours only, oldest first. */
-  hourWins: readonly number[];
+  /** Leaderboard blocks (start ms) this player won, completed blocks only, oldest first. */
+  blockWins: readonly number[];
   /** Days seen so far, by day key. */
   days: ReadonlyMap<string, DayInfo>;
   /** Ids of the achievements this player has earned so far (re-checked until stable, so Collector sees them all). */

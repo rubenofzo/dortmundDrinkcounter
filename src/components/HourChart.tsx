@@ -3,7 +3,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { ChartPoint, ChartSeries } from "@/lib/hours";
 
-/** Points per hour, stacked by person, coloured by player. Data from `hourChartData` in `src/lib/hours.ts`. */
+/** Points per 3-hour block, stacked by person, coloured by player. Data from `blockChartData` in `src/lib/hours.ts`. */
 export function HourChart({ points, series, height = 240 }: { points: ChartPoint[]; series: ChartSeries[]; height?: number }) {
   if (points.length === 0) {
     return <p className="py-10 text-center text-sm text-mist">No drinks yet. The chart starts with the first one.</p>;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Drink, Player } from "./data";
-import { hourWinners, rankDrinks } from "./leaderboard";
-import { dayKey, HOUR_MS } from "./time";
+import { blockWinners, rankDrinks } from "./leaderboard";
+import { BLOCK_MS, dayKey, HOUR_MS } from "./time";
 
 const players: Player[] = ["Ana", "Ben", "Cy"].map((name, i) => ({
   id: i + 1,
@@ -35,13 +35,20 @@ describe("rankDrinks", () => {
   });
 });
 
-describe("hourWinners", () => {
-  it("only counts completed hours and keeps ties", () => {
-    const ds = [drink(1, H + 5, 2), drink(2, H + 9, 2), drink(3, H + HOUR_MS + 5, 4), drink(3, H + 2 * HOUR_MS + 5, 9)];
-    const w = hourWinners(ds, H + 2 * HOUR_MS + 10);
+describe("blockWinners", () => {
+  // Fri 27 Nov 12:00 Berlin (11:00 UTC): the start of the 12–15 block.
+  const B = Date.UTC(2026, 10, 27, 11);
+  it("only counts completed 3-hour blocks and keeps ties", () => {
+    const ds = [
+      drink(1, B + 5, 2),
+      drink(2, B + 2 * HOUR_MS, 2),
+      drink(3, B + BLOCK_MS + 5, 4),
+      drink(3, B + 2 * BLOCK_MS + 5, 9),
+    ];
+    const w = blockWinners(ds, B + 2 * BLOCK_MS + 10);
     expect([...w.entries()]).toEqual([
-      [H, [1, 2]],
-      [H + HOUR_MS, [3]],
+      [B, [1, 2]],
+      [B + BLOCK_MS, [3]],
     ]);
   });
 });

@@ -23,7 +23,8 @@ describe("totals", () => {
 describe("hours", () => {
   it("finds the best hour and the longest streak", () => {
     const ds = [drink(berlin(27, 20, 5), 1), drink(berlin(27, 20, 40), 2), drink(berlin(27, 21, 10)), drink(berlin(27, 22, 10)), drink(berlin(27, 23, 59)), drink(berlin(28, 2, 0))];
-    expect(bestHour(ds)).toEqual({ hour: berlin(27, 20), points: 3 });
+    // Blocks 18–21 and 21–24 both have 3 points; the earlier block wins the tie.
+    expect(bestHour(ds)).toEqual({ hour: berlin(27, 18), points: 3 });
     expect(longestStreak(ds)).toEqual({ hours: 4, from: berlin(27, 20) });
     expect(longestStreak([])).toBeNull();
   });

@@ -98,9 +98,42 @@ export function hoursBetween(from: number, to: number): number[] {
   return out;
 }
 
-/** "2:05" style countdown text from milliseconds. */
+/** Countdown text from milliseconds: "2:05", or "2:12:04" from an hour up. */
 export function formatCountdown(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
-  const m = Math.floor(s / 60);
-  return `${m}:${String(s % 60).padStart(2, "0")}`;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = String(s % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
+}
+
+/**
+ * Leaderboard blocks: 3 hours each, starting at 00, 03, 06, 09, 12, 15, 18 and 21 Berlin time
+ * (so 12–15, 15–18, 18–21, 21–24, ...).
+ */
+export const BLOCK_HOURS = 3;
+export const BLOCK_MS = BLOCK_HOURS * HOUR_MS;
+
+/** Start of the Berlin 3-hour block containing `ms`. */
+export function blockStart(ms: number): number {
+  return hourStart(ms) - (berlinParts(ms).hour % BLOCK_HOURS) * HOUR_MS;
+}
+
+/** End of the block starting at `start` (the next block's start, safe across clock changes). */
+export function blockEnd(start: number): number {
+  return blockStart(start + BLOCK_MS + HOUR_MS);
+}
+
+/** Block starts from the block containing `from` to the one containing `to`, inclusive. */
+export function blocksBetween(from: number, to: number): number[] {
+  const out: number[] = [];
+  for (let b = blockStart(from); b <= blockStart(to); b = blockEnd(b)) out.push(b);
+  return out;
+}
+
+/** "Fri 12–15" (21–24 for the last block of the evening). */
+export function blockLabel(start: number): string {
+  const p = berlinParts(start);
+  const end = p.hour + BLOCK_HOURS;
+  return `${p.weekday} ${String(p.hour).padStart(2, "0")}–${String(end).padStart(2, "0")}`;
 }
