@@ -58,16 +58,19 @@ export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[
         <button
           type="button"
           onClick={() => choose(me)}
-          className="flex min-h-16 w-full items-center gap-3 rounded-2xl bg-accent px-4 text-left text-foam shadow-[0_8px_20px_rgba(229,58,47,0.25)] transition active:scale-[0.98] active:bg-accent-dark"
+          className="flex min-h-[88px] w-full items-center gap-3 rounded-2xl border border-accent/60 bg-accent-dark/70 px-3.5 py-3 text-left text-foam transition hover:bg-accent-dark active:scale-[0.98] active:bg-accent-dark"
         >
-          <PlayerDot color={me.color} size={12} on="hall" />
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[17px] font-extrabold">Drink for me</span>
-            <span className="tabular block text-[12.5px] text-foam/85">
-              {me.name} · {me.todayPoints} pts today · {me.todayCount} 🍺
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex items-center gap-2">
+              <PlayerDot color={me.color} size={12} on="hall" />
+              <span className="min-w-0 truncate text-[17px] font-extrabold">{me.name}</span>
+            </span>
+            <span className="font-display text-[28px] leading-none uppercase">Drink for me</span>
+            <span className="tabular text-[12px] text-foam/80">
+              {me.todayPoints} pts today · {me.todayCount} 🍺
             </span>
           </span>
-          <span aria-hidden className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-foam text-[24px] leading-none font-bold text-accent">
+          <span aria-hidden className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-foam text-[28px] leading-none font-bold text-accent-dark">
             +
           </span>
         </button>
