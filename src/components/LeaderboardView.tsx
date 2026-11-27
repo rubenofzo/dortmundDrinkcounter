@@ -17,7 +17,7 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 /** Leaderboard screen: tabs, chip strip, ranking. All selection lives in the URL. */
-export function LeaderboardView({ hub, tab, h, d, meId }: { hub: Hub; tab: Tab; h?: number; d?: string; meId?: number }) {
+export function LeaderboardView({ hub, tab, h, d }: { hub: Hub; tab: Tab; h?: number; d?: string }) {
   const { drinks, players, now } = hub;
   const playerById = new Map(players.map((p) => [p.id, p]));
   const winners = blockWinners(drinks, now);
@@ -44,10 +44,10 @@ export function LeaderboardView({ hub, tab, h, d, meId }: { hub: Hub; tab: Tab; 
       <>
         <HourStrip chips={chips} selected={String(sel)} />
         <HallPanel>
-          <SectionTitle className="mb-2 uppercase">
+          <SectionTitle className="mb-3 uppercase">
             {blockLabel(sel)} {sel === current ? "· live" : ""}
           </SectionTitle>
-          {rows.length === 0 ? <p className="text-mist">No drinks in this block.</p> : <RankingList rows={rows} crowned={done} meId={meId} />}
+          {rows.length === 0 ? <p className="text-mist">No drinks in this block.</p> : <RankingList rows={rows} crowned={done} />}
         </HallPanel>
         <HallOfHours winners={winners} playerById={playerById} />
       </>
@@ -70,8 +70,8 @@ export function LeaderboardView({ hub, tab, h, d, meId }: { hub: Hub; tab: Tab; 
       <>
         <HourStrip chips={chips} selected={sel} />
         <HallPanel>
-          <SectionTitle className="mb-2 uppercase">{dayLabel(sel)}</SectionTitle>
-          {rows.length === 0 ? <p className="text-mist">No drinks on this day yet.</p> : <RankingList rows={rows} meId={meId} />}
+          <SectionTitle className="mb-3 uppercase">{dayLabel(sel)}</SectionTitle>
+          {rows.length === 0 ? <p className="text-mist">No drinks on this day yet.</p> : <RankingList rows={rows} />}
         </HallPanel>
       </>
     );
@@ -79,15 +79,15 @@ export function LeaderboardView({ hub, tab, h, d, meId }: { hub: Hub; tab: Tab; 
     const rows = rankDrinks(drinks, players);
     body = (
       <HallPanel>
-        <SectionTitle className="mb-2 uppercase">Whole weekend</SectionTitle>
-        {rows.length === 0 ? <p className="text-mist">No drinks logged yet.</p> : <RankingList rows={rows} meId={meId} />}
+        <SectionTitle className="mb-3 uppercase">Whole weekend</SectionTitle>
+        {rows.length === 0 ? <p className="text-mist">No drinks logged yet.</p> : <RankingList rows={rows} />}
       </HallPanel>
     );
   }
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <PageTitle className="uppercase max-md:sr-only">Leaderboard</PageTitle>
+      <PageTitle className="uppercase">Leaderboard</PageTitle>
       <nav className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-hall-panel p-1" aria-label="Leaderboard range">
         {TABS.map((t) => (
           <Link
@@ -96,7 +96,7 @@ export function LeaderboardView({ hub, tab, h, d, meId }: { hub: Hub; tab: Tab; 
             scroll={false}
             aria-current={t.key === tab ? "page" : undefined}
             className={clsx(
-              "flex min-h-11 items-center justify-center rounded-lg font-display text-lg uppercase",
+              "flex min-h-12 items-center justify-center rounded-lg font-display text-lg uppercase",
               t.key === tab ? "bg-accent text-foam" : "text-mist hover:text-foam",
             )}
           >

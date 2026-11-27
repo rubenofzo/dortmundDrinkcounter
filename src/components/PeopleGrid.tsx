@@ -14,16 +14,17 @@ export type TileData = {
   isMe: boolean;
   todayPoints: string;
   todayCount: number;
+  /** Still-in-system figure in points, formatted ("0.0" hides the line). */
+  load: string;
 };
 
-/** "Drink for me" button, a compact name grid (with search for big groups), the drink picker sheet and the log toast. */
+/** "Drink for me" button, the big tappable tiles for everyone else, the drink picker sheet and the log toast. */
 export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[] }) {
   const router = useRouter();
   const [target, setTarget] = useState<TileData | null>(null);
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [pending, start] = useTransition();
-  const [query, setQuery] = useState("");
   const dismiss = useCallback(() => setToast(null), []);
 
   function pick(p: PickPayload, honeypot: string) {
@@ -45,9 +46,7 @@ export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[
   }
 
   const me = tiles.find((t) => t.isMe);
-  const others = tiles.filter((t) => !t.isMe).sort((a, b) => a.name.localeCompare(b.name));
-  const q = query.trim().toLowerCase();
-  const shown = q ? others.filter((t) => t.name.toLowerCase().includes(q)) : others;
+  const others = tiles.filter((t) => !t.isMe);
   const choose = (t: TileData) => {
     setTarget(t);
     setOpen(true);
@@ -55,59 +54,50 @@ export function PeopleGrid({ tiles, menu }: { tiles: TileData[]; menu: MenuItem[
 
   return (
     <>
-      <section className="flex flex-col gap-2.5">
-        {me && (
-          <button
-            type="button"
-            onClick={() => choose(me)}
-            className="flex min-h-16 w-full items-center gap-3 rounded-2xl bg-accent px-4 text-left text-foam shadow-[0_8px_20px_rgba(229,58,47,0.25)] transition active:scale-[0.98] active:bg-accent-dark"
-          >
-            <PlayerDot color={me.color} size={12} on="hall" />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[17px] font-extrabold">Drink for me</span>
-              <span className="tabular block text-[12.5px] text-foam/85">
-                {me.name} · {me.todayPoints} pts today · {me.todayCount} 🍺
+      {me && (
+        <button
+          type="button"
+          onClick={() => choose(me)}
+          className="flex min-h-16 w-full items-center gap-3 rounded-2xl bg-accent px-4 text-left text-foam shadow-[0_8px_20px_rgba(229,58,47,0.25)] transition active:scale-[0.98] active:bg-accent-dark"
+        >
+          <PlayerDot color={me.color} size={12} on="hall" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[17px] font-extrabold">Drink for me</span>
+            <span className="tabular block text-[12.5px] text-foam/85">
+              {me.name} · {me.todayPoints} pts today · {me.todayCount} 🍺
+            </span>
+          </span>
+          <span aria-hidden className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-foam text-[24px] leading-none font-bold text-accent">
+            +
+          </span>
+        </button>
+      )}
+      <ul className="grid grid-cols-2 gap-2.5 md:grid-cols-3 md:gap-3.5 lg:grid-cols-4">
+        {others.map((t) => (
+          <li key={t.id}>
+            <button
+              type="button"
+              onClick={() => choose(t)}
+              className={`flex min-h-[88px] w-full flex-col justify-between gap-1 rounded-2xl border px-3.5 py-3 text-left transition active:scale-[0.97] active:bg-accent-dark ${
+                t.isMe ? "border-accent bg-accent/15" : "border-line bg-hall-panel"
+              } hover:border-accent`}
+            >
+              <span className="flex items-center gap-2">
+                <PlayerDot color={t.color} size={12} on="hall" />
+                <span className="min-w-0 flex-1 truncate text-[17px] font-extrabold">{t.name}</span>
+                {t.isMe && <span className="text-[10px] font-bold tracking-widest text-accent-light uppercase">you</span>}
               </span>
-            </span>
-            <span aria-hidden className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-foam text-[24px] leading-none font-bold text-accent">
-              +
-            </span>
-          </button>
-        )}
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-[11px] font-bold tracking-[0.14em] text-mist uppercase">{me ? "Or for someone else" : "Tap a name to log a drink"}</h2>
-          {others.length > 9 && (
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Find…"
-              aria-label="Find a person"
-              className="h-9 w-32 rounded-full border border-line bg-hall-panel px-3.5 text-[14px] text-foam placeholder:text-mist/70 focus:border-accent focus:outline-none"
-            />
-          )}
-        </div>
-        <ul className="grid grid-cols-3 gap-1.5 md:grid-cols-5 md:gap-3 lg:grid-cols-6">
-          {shown.map((t) => (
-            <li key={t.id}>
-              <button
-                type="button"
-                onClick={() => choose(t)}
-                className="flex min-h-[52px] w-full flex-col justify-center gap-0.5 rounded-xl border border-line bg-hall-panel px-2.5 py-1.5 text-left transition hover:border-accent active:scale-[0.97] active:bg-accent-dark"
-              >
-                <span className="flex items-center gap-1.5">
-                  <PlayerDot color={t.color} size={8} on="hall" />
-                  <span className="min-w-0 flex-1 truncate text-[14.5px] font-bold">{t.name}</span>
+              <span className="flex items-end justify-between gap-2">
+                <span className="tabular font-display text-[28px] leading-none">
+                  {t.todayPoints}
+                  <span className="ml-1 text-[12px] font-sans font-semibold text-mist">pts · {t.todayCount} 🍺</span>
                 </span>
-                <span className="tabular text-[11.5px] text-mist">
-                  {t.todayPoints} pts · {t.todayCount} 🍺
-                </span>
-              </button>
-            </li>
-          ))}
-          {shown.length === 0 && <li className="col-span-full py-3 text-center text-sm text-mist">Nobody called “{query}”.</li>}
-        </ul>
-      </section>
+              </span>
+              {t.load !== "0.0" && <span className="tabular text-[12px] text-mist">still in system {t.load} pts</span>}
+            </button>
+          </li>
+        ))}
+      </ul>
       <DrinkPicker forName={target?.name ?? null} menu={menu} open={open} busy={pending} onPick={pick} onClose={() => setOpen(false)} />
       <LogToast toast={toast} onUndo={undo} onDismiss={dismiss} />
     </>
