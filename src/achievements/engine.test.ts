@@ -193,23 +193,11 @@ describe("Glühwein achievements", () => {
 });
 
 describe("hidden achievements", () => {
-  it("Twins: same drink by someone else within a minute", () => {
-    const { get } = run([drink(1, fri(20)), drink(2, fri(20, 1)), drink(3, fri(20, 5))], fri(21));
-    expect(get("twins", 1)?.at).toBe(fri(20, 1));
-    expect(get("twins", 2)?.at).toBe(fri(20, 1));
-    expect(get("twins", 3)).toBeUndefined();
-  });
-
   it("Déjà Vu: 5 of the same in a row", () => {
     const five = Array.from({ length: 5 }, (_, i) => drink(1, fri(18 + i)));
     expect(run(five, fri(23, 30)).get("deja-vu", 1)?.at).toBe(fri(22));
     const broken = [...five.slice(0, 4), drink(1, fri(22), { name: "Shot", category: "Shots", drinkTypeId: 9 }), drink(1, fri(23))];
     expect(run(broken, fri(23, 30)).get("deja-vu", 1)).toBeUndefined();
-  });
-
-  it("Midnight Toast: 00:00 to 00:02", () => {
-    expect(run([drink(1, fri(0, 2, 28))], fri(1, 0, 28)).get("midnight-toast", 1)).toBeDefined();
-    expect(run([drink(1, fri(0, 3, 28))], fri(1, 0, 28)).get("midnight-toast", 1)).toBeUndefined();
   });
 
   it("Brak: 10 drinks in 3 blocks, then 3 empty blocks, unlocked when the 3rd empty block ends", () => {

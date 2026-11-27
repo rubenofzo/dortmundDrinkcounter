@@ -444,31 +444,12 @@ export const achievements: AchievementDefinition[] = [
   },
   // Hidden: ??? until someone earns them.
   {
-    id: "twins",
-    name: "Twins",
-    description: "You and someone else log the same drink within 1 minute.",
-    icon: "👯",
-    hidden: true,
-    check: (c) => c.mine.some((m) => c.drinks.some((d) => d.playerId !== m.playerId && sameDrink(d, m) && Math.abs(d.at - m.at) <= MINUTE_MS)),
-  },
-  {
     id: "deja-vu",
     name: "Déjà Vu",
     description: "The same drink 5 times in a row.",
     icon: "🔂",
     hidden: true,
     check: (c) => sameInARow(c) >= 5,
-  },
-  {
-    id: "midnight-toast",
-    name: "Midnight Toast",
-    description: "A drink between 00:00 and 00:02.",
-    icon: "🕛",
-    hidden: true,
-    check: (c) => c.mine.some((d) => {
-      const p = berlinParts(d.at);
-      return p.hour === 0 && p.minute <= 2;
-    }),
   },
   {
     id: "brak",
