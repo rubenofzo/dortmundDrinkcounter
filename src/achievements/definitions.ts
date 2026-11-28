@@ -12,6 +12,15 @@ const MINUTE_MS = 60_000;
 
 const count = (ctx: AchievementContext, test: (d: Drink) => boolean) => ctx.mine.filter(test).length;
 
+/** True if the player made one of `lastIds`' drinks, or shares a room with someone who did. */
+function inLastRoom(ctx: AchievementContext, lastIds: ReadonlySet<number>): boolean {
+  if (lastIds.has(ctx.player.id)) return true;
+  const room = ctx.roomOf.get(ctx.player.id);
+  if (room == null) return false;
+  for (const id of lastIds) if (ctx.roomOf.get(id) === room) return true;
+  return false;
+}
+
 /** Largest number of a player's drinks matching `test` in one bucket (hour, block or day). */
 function maxPerBucket(ctx: AchievementContext, test: (d: Drink) => boolean, bucket: (d: Drink) => string | number) {
   const counts = new Map<string | number, number>();
@@ -221,14 +230,16 @@ export const achievements: AchievementDefinition[] = [
   {
     id: "last-one-standing",
     name: "Last One Standing",
-    description: "Make the last drink of the group on a night (after 02:00).",
+    description: "Be in the last room standing: your room makes the group's last drink of a night (after 02:00).",
     icon: "🦉",
     tier: "rare",
-    // A night is settled once nobody has drunk for 2 hours or the day has ended (06:00),
-    // so the badge isn't handed out and then taken by a later drink. Later drinks don't revoke it.
+    // Everyone in the room of whoever made the night's last drink gets it (just that person if
+    // they have no room). A night is settled once nobody has drunk for 2 hours or the day has
+    // ended (06:00), so the badge isn't handed out and then taken by a later drink. Later drinks
+    // don't revoke it.
     check: (c) =>
       [...c.days.values()].some((day) => {
-        if (!day.lastIds.has(c.player.id)) return false;
+        if (!inLastRoom(c, day.lastIds)) return false;
         const h = berlinParts(day.lastAt).hour;
         if (h < 2 || h >= 6) return false;
         return c.at >= day.lastAt + 2 * HOUR_MS || c.at >= day.endsAt;

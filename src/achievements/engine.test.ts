@@ -43,8 +43,8 @@ function drink(
   };
 }
 
-function run(drinks: Drink[], now: number, deletedDrinks: Drink[] = []) {
-  const input: EngineInput = { players, drinks, deletedDrinks, now };
+function run(drinks: Drink[], now: number, deletedDrinks: Drink[] = [], who: Player[] = players) {
+  const input: EngineInput = { players: who, drinks, deletedDrinks, now };
   const r = evaluateAchievements(input);
   const get = (id: string, playerId: number) =>
     r.summaries.find((s) => s.definition.id === id)!.unlocks.find((u) => u.playerId === playerId);
@@ -102,6 +102,17 @@ describe("achievement engine", () => {
     const late = run(drinks, fri(24 + 6));
     expect(late.get("last-one-standing", 2)?.at).toBe(fri(24 + 5));
     expect(late.get("last-one-standing", 1)).toBeUndefined();
+  });
+
+  it("Last One Standing goes to the whole last room standing", () => {
+    // Anna (1) and Ben (2) share room 1, Cem (3) is in room 2, Dora (4) has no room.
+    const roomed = players.map((p) => ({ ...p, roomId: p.id <= 2 ? 1 : p.id === 3 ? 2 : null }));
+    const drinks = [drink(2, fri(22)), drink(3, fri(23)), drink(4, fri(24)), drink(1, fri(24 + 3))];
+    const { get } = run(drinks, fri(24 + 6), [], roomed);
+    expect(get("last-one-standing", 1)?.at).toBe(fri(24 + 5));
+    expect(get("last-one-standing", 2)?.at).toBe(fri(24 + 5));
+    expect(get("last-one-standing", 3)).toBeUndefined();
+    expect(get("last-one-standing", 4)).toBeUndefined();
   });
 
   it("Completionist counts the other 30 achievements", () => {

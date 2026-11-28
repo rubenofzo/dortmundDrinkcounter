@@ -35,6 +35,8 @@ export type AchievementContext = {
   deletedCount: number;
   /** Leaderboard blocks (start ms) this player won, completed blocks only, oldest first. */
   blockWins: readonly number[];
+  /** Each player's room id (null without a room), for room-based achievements. */
+  roomOf: ReadonlyMap<number, number | null>;
   /** Days seen so far, by day key. */
   days: ReadonlyMap<string, DayInfo>;
   /** Ids of the achievements this player has earned so far. */
