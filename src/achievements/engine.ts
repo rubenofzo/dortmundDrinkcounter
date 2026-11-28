@@ -105,6 +105,7 @@ function replay(hub: EngineInput, definitions: AchievementDefinition[]): Achieve
   const unlocked = new Map<string, Unlock>(); // `${achievementId}:${playerId}`
   const lastContext = new Map<number, AchievementContext>();
   const dayMap = new Map<string, DayInfo>();
+  const roomOf = new Map(hub.players.map((p) => [p.id, p.roomId]));
   let di = 0;
   let xi = 0;
 
@@ -137,6 +138,7 @@ function replay(hub: EngineInput, definitions: AchievementDefinition[]): Achieve
           .filter(([, ids]) => ids.includes(player.id))
           .map(([h]) => h)
           .sort((a, b) => a - b),
+        roomOf,
         days: dayMap,
         unlockedIds: earned,
       };
